@@ -1,7 +1,7 @@
-pragma solidity ^0.5.0;
-
-import "@openzeppelin/contracts/math/Math.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interface/IWETH.sol";
 import "./interface/IUniswapV2Exchange.sol";
 import "./IOneSplit.sol";
@@ -42,7 +42,7 @@ library Array {
 //    presented in `flags` or from transaction origin in case of FLAG_ENABLE_CHI_BURN_BY_ORIGIN (0x4000000000000000)
 //    presented in `flags`. Burned amount would refund up to 43% of gas fees.
 //
-contract OneSplitAudit is IOneSplit, Ownable {
+contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     using SafeMath for uint256;
     using UniversalERC20 for IERC20;
     using Array for IERC20[];
@@ -66,13 +66,12 @@ contract OneSplitAudit is IOneSplit, Ownable {
         uint256 feePercent
     );
 
-    constructor(IOneSplitMulti impl) public {
+    constructor(IOneSplitMulti impl) {
         setNewImpl(impl);
     }
 
-    function() external payable {
-        // solium-disable-next-line security/no-tx-origin
-        require(msg.sender != tx.origin, "OneSplit: do not send ETH directly");
+    fallback() external payable {
+        revert("OneSplit: do not send ETH directly");
     }
 
     function setNewImpl(IOneSplitMulti impl) public onlyOwner {
@@ -97,6 +96,7 @@ contract OneSplitAudit is IOneSplit, Ownable {
     )
         public
         view
+        override
         returns(
             uint256 returnAmount,
             uint256[] memory distribution
@@ -131,6 +131,7 @@ contract OneSplitAudit is IOneSplit, Ownable {
     )
         public
         view
+        override
         returns(
             uint256 returnAmount,
             uint256 estimateGasAmount,
@@ -193,7 +194,7 @@ contract OneSplitAudit is IOneSplit, Ownable {
         uint256 minReturn,
         uint256[] memory distribution,
         uint256 flags // See contants in IOneSplit.sol
-    ) public payable returns(uint256) {
+    ) public payable override returns(uint256) {
         return swapWithReferral(
             fromToken,
             destToken,

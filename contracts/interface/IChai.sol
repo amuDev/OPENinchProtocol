@@ -1,5 +1,5 @@
-pragma solidity ^0.5.0;
-
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 
@@ -18,8 +18,8 @@ interface IPot {
 }
 
 
-contract IChai is IERC20 {
-    function POT() public view returns (IPot);
+interface IChai is IERC20 {
+    function POT() external view returns (IPot);
 
     function join(address dst, uint256 wad) external;
 
@@ -98,7 +98,7 @@ library ChaiHelper {
     }
 
     function potDrip() private view returns (uint256) {
-        return _rmul(rpow(POT.dsr(), now - POT.rho(), RAY), POT.chi());
+        return _rmul(rpow(POT.dsr(), block.timestamp - POT.rho(), RAY), POT.chi());
     }
 
     function chaiPrice(IChai chai) internal view returns(uint256) {
@@ -109,7 +109,7 @@ library ChaiHelper {
         IChai /*chai*/,
         uint256 amount
     ) internal view returns (uint256) {
-        uint256 chi = (now > POT.rho()) ? potDrip() : POT.chi();
+        uint256 chi = (block.timestamp > POT.rho()) ? potDrip() : POT.chi();
         return _rdiv(amount, chi);
     }
 
@@ -117,7 +117,7 @@ library ChaiHelper {
         IChai /*chai*/,
         uint256 amount
     ) internal view returns (uint256) {
-        uint256 chi = (now > POT.rho()) ? potDrip() : POT.chi();
+        uint256 chi = (block.timestamp > POT.rho()) ? potDrip() : POT.chi();
         return _rmul(chi, amount);
     }
 }

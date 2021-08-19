@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
-
-import "@openzeppelin/contracts/math/SafeMath.sol";
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface/IUniswapFactory.sol";
 import "./interface/IKyberNetworkProxy.sol";
@@ -31,7 +31,7 @@ import "./UniversalERC20.sol";
 import "./BalancerLib.sol";
 
 
-contract IOneSplitView is IOneSplitConsts {
+interface IOneSplitView {
     function getExpectedReturn(
         IERC20 fromToken,
         IERC20 destToken,
@@ -39,7 +39,7 @@ contract IOneSplitView is IOneSplitConsts {
         uint256 parts,
         uint256 flags
     )
-        public
+        external
         view
         returns(
             uint256 returnAmount,
@@ -54,7 +54,7 @@ contract IOneSplitView is IOneSplitConsts {
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
     )
-        public
+        external
         view
         returns(
             uint256 returnAmount,
@@ -71,7 +71,7 @@ library DisableFlags {
 }
 
 
-contract OneSplitRoot is IOneSplitView {
+contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
     using SafeMath for uint256;
     using DisableFlags for uint256;
 
@@ -82,7 +82,7 @@ contract OneSplitRoot is IOneSplitView {
 
     uint256 constant internal DEXES_COUNT = 34;
     IERC20 constant internal ETH_ADDRESS = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
-    IERC20 constant internal ZERO_ADDRESS = IERC20(0);
+    IERC20 constant internal ZERO_ADDRESS = IERC20(0x0000000000000000000000000000000000000000);
 
     IBancorEtherToken constant internal bancorEtherToken = IBancorEtherToken(0xc0829421C1d260BD3cB3E0F06cfE2D52db2cE315);
     IWETH constant internal weth = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
@@ -1737,7 +1737,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         oneSplitView = _oneSplitView;
     }
 
-    function() external payable {
+    fallback() external payable {
         // solium-disable-next-line security/no-tx-origin
         require(msg.sender != tx.origin);
     }
@@ -2020,7 +2020,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             address(destToken),
             amount,
             0,
-            now + 50
+            block.timestamp + 50
         );
     }
 

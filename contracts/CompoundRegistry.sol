@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
-
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface/ICompoundRegistry.sol";
 import "./UniversalERC20.sol";
@@ -15,14 +15,14 @@ contract CompoundRegistry is Ownable, ICompoundRegistry {
     mapping(address => address) private _tokenByCToken;
     mapping(address => address) private _cTokenByToken;
 
-    function tokenByCToken(ICompoundToken cToken) external view returns(IERC20) {
+    function tokenByCToken(ICompoundToken cToken) external view override returns(IERC20) {
         if (cToken == cETH) {
             return ETH;
         }
         return IERC20(_tokenByCToken[address(cToken)]);
     }
 
-    function cTokenByToken(IERC20 token) external view returns(ICompoundToken) {
+    function cTokenByToken(IERC20 token) external view override returns(ICompoundToken) {
         if (token.isETH()) {
             return cETH;
         }

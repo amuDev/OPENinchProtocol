@@ -1,5 +1,5 @@
-pragma solidity ^0.5.0;
-
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
 import "./IOneSplit.sol";
 import "./OneSplitBase.sol";
 import "./OneSplitCompound.sol";
@@ -139,7 +139,7 @@ contract OneSplitWrap is
         oneSplit = _oneSplit;
     }
 
-    function() external payable {
+    fallback() external payable {
         // solium-disable-next-line security/no-tx-origin
         require(msg.sender != tx.origin);
     }

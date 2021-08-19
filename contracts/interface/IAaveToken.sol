@@ -1,9 +1,9 @@
-pragma solidity ^0.5.0;
-
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 
-contract IAaveToken is IERC20 {
+interface IAaveToken is IERC20 {
     function underlyingAssetAddress() external view returns (IERC20);
 
     function redeem(uint256 amount) external;

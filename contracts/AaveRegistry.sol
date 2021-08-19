@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
-
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface/IAaveRegistry.sol";
 import "./UniversalERC20.sol";
@@ -15,14 +15,14 @@ contract AaveRegistry is Ownable, IAaveRegistry {
     mapping(address => address) private _tokenByAToken;
     mapping(address => address) private _aTokenByToken;
 
-    function tokenByAToken(IAaveToken aToken) external view returns(IERC20) {
+    function tokenByAToken(IAaveToken aToken) external view override returns(IERC20) {
         if (aToken == aETH) {
             return ETH;
         }
         return IERC20(_tokenByAToken[address(aToken)]);
     }
 
-    function aTokenByToken(IERC20 token) external view returns(IAaveToken) {
+    function aTokenByToken(IERC20 token) external view override returns(IAaveToken) {
         if (token.isETH()) {
             return aETH;
         }

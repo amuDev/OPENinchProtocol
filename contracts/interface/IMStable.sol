@@ -1,9 +1,9 @@
-pragma solidity ^0.5.0;
-
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 
-contract IMStable is IERC20 {
+interface IMStable is IERC20 {
     function getSwapOutput(
         IERC20 _input,
         IERC20 _output,
@@ -31,7 +31,7 @@ contract IMStable is IERC20 {
 }
 
 interface IMassetValidationHelper {
-    /**
+    /*
      * @dev Returns a valid bAsset to redeem
      * @param _mAsset Masset addr
      * @return valid bool
@@ -49,7 +49,7 @@ interface IMassetValidationHelper {
             address token
         );
 
-    /**
+    /*
      * @dev Returns a valid bAsset with which to mint
      * @param _mAsset Masset addr
      * @return valid bool
@@ -67,7 +67,7 @@ interface IMassetValidationHelper {
             address token
         );
 
-    /**
+    /*
      * @dev Determines if a given Redemption is valid
      * @param _mAsset Address of the given mAsset (e.g. mUSD)
      * @param _mAssetQuantity Amount of mAsset to redeem (in mUSD units)

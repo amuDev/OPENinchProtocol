@@ -1,8 +1,8 @@
-pragma solidity ^0.5.0;
-
-import "@openzeppelin/contracts/math/SafeMath.sol";
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 
 library UniversalERC20 {
@@ -19,7 +19,7 @@ library UniversalERC20 {
         }
 
         if (isETH(token)) {
-            address(uint160(to)).transfer(amount);
+            payable(to).transfer(amount);
         } else {
             token.safeTransfer(to, amount);
             return true;
@@ -34,10 +34,10 @@ library UniversalERC20 {
         if (isETH(token)) {
             require(from == msg.sender && msg.value >= amount, "Wrong useage of ETH.universalTransferFrom()");
             if (to != address(this)) {
-                address(uint160(to)).transfer(amount);
+                payable(to).transfer(amount);
             }
             if (msg.value > amount) {
-                msg.sender.transfer(msg.value.sub(amount));
+                payable(msg.sender).transfer(msg.value.sub(amount));
             }
         } else {
             token.safeTransferFrom(from, to, amount);
@@ -52,7 +52,7 @@ library UniversalERC20 {
         if (isETH(token)) {
             if (msg.value > amount) {
                 // Return remainder if exist
-                msg.sender.transfer(msg.value.sub(amount));
+                payable(msg.sender).transfer(msg.value.sub(amount));
             }
         } else {
             token.safeTransferFrom(msg.sender, address(this), amount);

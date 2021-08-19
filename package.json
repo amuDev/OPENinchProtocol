@@ -8,9 +8,10 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@openzeppelin/contracts": "^2.5.0"
+        "@openzeppelin/contracts": "^4.3.0"
     },
     "devDependencies": {
+        "@openzeppelin/test-helpers": "^0.5.6",
         "chai": "^4.2.0",
         "coveralls": "^3.1.0",
         "eslint": "^7.3.1",
@@ -20,11 +21,10 @@
         "eslint-plugin-promise": "^4.0.1",
         "eslint-plugin-standard": "^4.0.0",
         "eth-gas-reporter": "^0.2.17",
+        "ethlint": "^1.2.5",
         "ganache-cli": "^6.9.1",
-        "@openzeppelin/test-helpers": "^0.5.6",
         "solc": "^0.5.17",
         "solidity-coverage": "^0.7.9",
-        "ethlint": "^1.2.5",
         "truffle": "^5.1.32",
         "truffle-flattener": "^1.4.4"
     },

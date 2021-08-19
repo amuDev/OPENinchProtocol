@@ -1,5 +1,5 @@
-pragma solidity ^0.5.0;
-
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.0;
 
 interface ICurve {
     // solium-disable-next-line mixedcase
@@ -16,7 +16,7 @@ interface ICurve {
 }
 
 
-contract ICurveRegistry {
+interface ICurveRegistry {
     function get_pool_info(address pool)
         external
         view
@@ -32,7 +32,7 @@ contract ICurveRegistry {
 }
 
 
-contract ICurveCalculator {
+interface ICurveCalculator {
     function get_dy(
         int128 nCoins,
         uint256[8] calldata balances,
