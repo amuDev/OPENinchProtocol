@@ -23,7 +23,7 @@ contract CompoundRegistry is Ownable, ICompoundRegistry {
     }
 
     function cTokenByToken(ERC20 token) external view override returns(ICompoundToken) {
-        if (token.isETH()) {
+        if (UniversalERC20.isETH(token)) {
             return cETH;
         }
         return ICompoundToken(_cTokenByToken[address(token)]);

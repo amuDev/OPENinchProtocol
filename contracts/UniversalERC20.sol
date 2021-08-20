@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-
+/// @dev How do we use UniversalERC20.isETH(fromToken) instead of UniversalERC20.istETH(fromToken)
 library UniversalERC20 {
 
     using SafeMath for uint256;

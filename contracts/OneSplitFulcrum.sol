@@ -8,7 +8,7 @@ contract OneSplitFulcrumBase {
     using UniversalERC20 for ERC20;
 
     function _isFulcrumToken(ERC20 token) internal view returns(ERC20) {
-        if (token.isETH()) {
+        if (UniversalERC20.isETH(token)) {
             return ERC20(-1);
         }
 
@@ -96,7 +96,7 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_FULCRUM)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_FULCRUM)) {
             ERC20 underlying = _isFulcrumToken(fromToken);
             if (underlying != ERC20(-1)) {
                 uint256 fulcrumRate = IFulcrumToken(address(fromToken)).tokenPrice();
@@ -167,7 +167,7 @@ abstract contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
             return;
         }
 
-        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_FULCRUM)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_FULCRUM)) {
             ERC20 underlying = _isFulcrumToken(fromToken);
             if (underlying != ERC20(-1)) {
                 if (underlying.isETH()) {

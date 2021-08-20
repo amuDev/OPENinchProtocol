@@ -25,10 +25,10 @@ contract BancorFinder {
             return new address[](0);
         }
 
-        if (fromToken.isETH()) {
+        if (UniversalERC20.isETH(fromToken)) {
             fromToken = ETH_ADDRESS;
         }
-        if (destToken.isETH()) {
+        if (UniversalERC20.isETH(destToken)) {
             destToken = ETH_ADDRESS;
         }
 
@@ -48,7 +48,7 @@ contract BancorFinder {
         if (fromToken != bnt) {
             (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
-                fromToken.isETH() ? ETH_ADDRESS : fromToken,
+                UniversalERC20.isETH(fromToken) ? ETH_ADDRESS : fromToken,
                 0
             ));
             if (!success) {
@@ -64,7 +64,7 @@ contract BancorFinder {
         if (destToken != bnt) {
             (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
-                destToken.isETH() ? ETH_ADDRESS : destToken,
+                UniversalERC20.isETH(destToken) ? ETH_ADDRESS : destToken,
                 0
             ));
             if (!success) {
