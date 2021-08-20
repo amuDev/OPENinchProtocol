@@ -489,8 +489,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     estimateGasAmount = estimateGasAmount + args.gases[i];
                     int256 value = args.matrix[i][args.distribution[i]];
                     returnAmount = returnAmount + uint256(
-                        (value == VERY_NEGATIVE_VALUE ? 0 : value) +
-                        int256(args.gases[i] * args.destTokenEthPriceTimesGasPrice / 1e18)
+                        uint256(value == VERY_NEGATIVE_VALUE ? int256(0) : value) +
+                        uint256(args.gases[i] * args.destTokenEthPriceTimesGasPrice / 1e18)
                     );
                 }
                 else {
