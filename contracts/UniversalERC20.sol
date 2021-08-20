@@ -111,6 +111,6 @@ library UniversalERC20 {
     }
 
     function notExist(IERC20 token) internal pure returns(bool) {
-        return (address(token) == address(-1)); //TODO: ?
+        return (address(token) == address(0));
     }
 }
