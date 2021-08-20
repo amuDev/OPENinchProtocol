@@ -25,7 +25,7 @@ contract OneSplitIearnBase {
 }
 
 
-contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
+abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -33,7 +33,7 @@ contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -129,14 +129,14 @@ contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
 }
 
 
-contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
+abstract contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         _iearnSwap(
             fromToken,
             destToken,

@@ -8,8 +8,8 @@ import "./IOneSplit.sol";
 import "./UniversalERC20.sol";
 
 
-contract IFreeFromUpTo is IERC20 {
-    function freeFromUpTo(address from, uint256 value) external returns(uint256 freed);
+abstract contract IFreeFromUpTo is IERC20 {
+    function freeFromUpTo(address from, uint256 value) virtual external returns(uint256 freed);
 }
 
 interface IReferralGasSponsor {
@@ -295,7 +295,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         Balances memory beforeBalances = _getFirstAndLastBalances(tokens, true);
 
         // Transfer From
-        if (amount == uint256(-1)) {
+        if (amount == type(uint256).max) { //TODO: Is this correct?
             amount = Math.min(
                 tokens.first().balanceOf(msg.sender),
                 tokens.first().allowance(msg.sender, address(this))
@@ -306,7 +306,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
 
         // Swap
         tokens.first().universalApprove(address(oneSplitImpl), confirmed);
-        oneSplitImpl.swapMulti.value(tokens.first().isETH() ? confirmed : 0)(
+        oneSplitImpl.swapMulti{value: (tokens.first().isETH() ? confirmed : 0)}( //TODO: Is this correct?
             tokens,
             confirmed,
             minReturn,
@@ -342,7 +342,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         if ((flags[0] & (FLAG_ENABLE_CHI_BURN | FLAG_ENABLE_CHI_BURN_BY_ORIGIN)) > 0) {
             uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
             _chiBurnOrSell(
-                ((flags[0] & FLAG_ENABLE_CHI_BURN_BY_ORIGIN) > 0) ? tx.origin : msg.sender,
+                ((flags[0] & FLAG_ENABLE_CHI_BURN_BY_ORIGIN) > 0) ? tx.origin : msg.sender, //TODO: what is this?
                 (gasSpent + 14154) / 41947
             );
         }

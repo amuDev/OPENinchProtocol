@@ -90,11 +90,11 @@ library UniversalERC20 {
             return 18;
         }
 
-        (bool success, bytes memory data) = address(token).staticcall.gas(10000)(
+        (bool success, bytes memory data) = address(token).staticcall{gas: 10000} (
             abi.encodeWithSignature("decimals()")
         );
         if (!success || data.length == 0) {
-            (success, data) = address(token).staticcall.gas(10000)(
+            (success, data) = address(token).staticcall{gas: 10000} (
                 abi.encodeWithSignature("DECIMALS()")
             );
         }
@@ -111,6 +111,6 @@ library UniversalERC20 {
     }
 
     function notExist(IERC20 token) internal pure returns(bool) {
-        return (address(token) == address(-1));
+        return (address(token) == address(-1)); //TODO: ?
     }
 }

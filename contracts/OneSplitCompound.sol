@@ -4,7 +4,7 @@ import "./interface/ICompound.sol";
 import "./OneSplitBase.sol";
 
 
-contract OneSplitCompoundView is OneSplitViewWrapBase {
+abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -12,7 +12,7 @@ contract OneSplitCompoundView is OneSplitViewWrapBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -94,14 +94,14 @@ contract OneSplitCompoundView is OneSplitViewWrapBase {
 }
 
 
-contract OneSplitCompound is OneSplitBaseWrap {
+abstract contract OneSplitCompound is OneSplitBaseWrap {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         _compoundSwap(
             fromToken,
             destToken,

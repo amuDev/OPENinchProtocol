@@ -49,7 +49,7 @@ contract OneSplitFulcrumBase {
 }
 
 
-contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBase {
+abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -57,7 +57,7 @@ contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -139,14 +139,14 @@ contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBase {
 }
 
 
-contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
+abstract contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         _fulcrumSwap(
             fromToken,
             destToken,

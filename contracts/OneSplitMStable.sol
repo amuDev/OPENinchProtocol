@@ -4,7 +4,7 @@ import "./interface/IChai.sol";
 import "./OneSplitBase.sol";
 
 
-contract OneSplitMStableView is OneSplitViewWrapBase {
+abstract contract OneSplitMStableView is OneSplitViewWrapBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -12,7 +12,7 @@ contract OneSplitMStableView is OneSplitViewWrapBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -98,14 +98,14 @@ contract OneSplitMStableView is OneSplitViewWrapBase {
 }
 
 
-contract OneSplitMStable is OneSplitBaseWrap {
+abstract contract OneSplitMStable is OneSplitBaseWrap {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         if (fromToken == destToken) {
             return;
         }

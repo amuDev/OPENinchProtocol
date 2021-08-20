@@ -38,7 +38,7 @@ contract OneSplitDMMBase {
 }
 
 
-contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
+abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -46,7 +46,7 @@ contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -137,14 +137,14 @@ contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
 }
 
 
-contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
+abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         _dmmSwap(
             fromToken,
             destToken,

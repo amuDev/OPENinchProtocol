@@ -34,8 +34,7 @@ contract OneSplitMooniswapTokenBase {
 }
 
 
-contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMooniswapTokenBase {
-
+abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMooniswapTokenBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 toToken,
@@ -43,7 +42,7 @@ contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMooniswapTo
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns (
@@ -231,14 +230,14 @@ contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMooniswapTo
 }
 
 
-contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapTokenBase {
+abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapTokenBase {
     function _swap(
         IERC20 fromToken,
         IERC20 toToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         if (fromToken.eq(toToken)) {
             return;
         }

@@ -71,7 +71,7 @@ library DisableFlags {
 }
 
 
-contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
+abstract contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
     using SafeMath for uint256;
     using DisableFlags for uint256;
 
@@ -187,7 +187,7 @@ contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
             partsLeft = parent[curExchange][partsLeft];
         }
 
-        returnAmount = (answer[n - 1][s] == VERY_NEGATIVE_VALUE) ? 0 : answer[n - 1][s];
+        returnAmount = (answer[n - 1][s] == VERY_NEGATIVE_VALUE) ? int256(0) : answer[n - 1][s];
     }
 
     function _kyberReserveIdByTokens(
@@ -266,14 +266,14 @@ contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
 }
 
 
-contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
+abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
     function getExpectedReturn(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags // See constants in IOneSplit.sol
-    )
+    ) override
         public
         view
         returns(
@@ -298,7 +298,7 @@ contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -324,7 +324,7 @@ contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) virtual
         internal
         view
         returns(
@@ -342,7 +342,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 amount,
         uint256 parts,
         uint256 flags // See constants in IOneSplit.sol
-    )
+    ) override
         public
         view
         returns(
@@ -367,7 +367,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -392,7 +392,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             (rets, gases[i]) = reserves[i](fromToken, destToken, amount, parts, flags);
 
             // Prepend zero and sub gas
-            int256 gas = int256(gases[i].mul(destTokenEthPriceTimesGasPrice).div(1e18));
+            int256 gas = int256(gases[i].mul(destTokenEthPriceTimesGasPrice).div(1e18)); //TODO: ?
             matrix[i] = new int256[](parts + 1);
             for (uint j = 0; j < rets.length; j++) {
                 matrix[i][j + 1] = int256(rets[j]) - gas;
@@ -1699,7 +1699,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 }
 
 
-contract OneSplitBaseWrap is IOneSplit, OneSplitRoot {
+abstract contract OneSplitBaseWrap is IOneSplit, OneSplitRoot { //TODO: ?
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
@@ -1730,7 +1730,7 @@ contract OneSplitBaseWrap is IOneSplit, OneSplitRoot {
 }
 
 
-contract OneSplit is IOneSplit, OneSplitRoot {
+contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
     IOneSplitView public oneSplitView;
 
     constructor(IOneSplitView _oneSplitView) public {
@@ -1748,7 +1748,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 parts,
         uint256 flags
-    )
+    ) override(IOneSplitView, IOneSplit) //TODO: this seems wrong
         public
         view
         returns(
@@ -1773,7 +1773,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override(IOneSplit, IOneSplitView) //TODO: this seems wrong
         public
         view
         returns(
@@ -1799,7 +1799,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 minReturn,
         uint256[] memory distribution,
         uint256 flags  // See constants in IOneSplit.sol
-    ) public payable returns(uint256 returnAmount) {
+    ) override public payable returns(uint256 returnAmount) {
         if (fromToken == destToken) {
             return amount;
         }

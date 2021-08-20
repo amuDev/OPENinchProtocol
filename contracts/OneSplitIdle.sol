@@ -23,7 +23,7 @@ contract OneSplitIdleBase {
 }
 
 
-contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
+abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -31,7 +31,7 @@ contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -117,14 +117,14 @@ contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
 }
 
 
-contract OneSplitIdle is OneSplitBaseWrap, OneSplitIdleBase {
+abstract contract OneSplitIdle is OneSplitBaseWrap, OneSplitIdleBase {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         _idleSwap(
             fromToken,
             destToken,

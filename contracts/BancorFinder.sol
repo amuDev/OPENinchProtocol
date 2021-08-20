@@ -46,7 +46,7 @@ contract BancorFinder {
         );
 
         if (fromToken != bnt) {
-            (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall.gas(100000)(abi.encodeWithSelector(
+            (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
                 fromToken.isETH() ? ETH_ADDRESS : fromToken,
                 0
@@ -62,7 +62,7 @@ contract BancorFinder {
         }
 
         if (destToken != bnt) {
-            (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall.gas(100000)(abi.encodeWithSelector(
+            (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
                 destToken.isETH() ? ETH_ADDRESS : destToken,
                 0

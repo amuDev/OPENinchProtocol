@@ -4,7 +4,7 @@ import "./interface/IAaveToken.sol";
 import "./OneSplitBase.sol";
 
 
-contract OneSplitAaveView is OneSplitViewWrapBase {
+abstract contract OneSplitAaveView is OneSplitViewWrapBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -12,7 +12,7 @@ contract OneSplitAaveView is OneSplitViewWrapBase {
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -91,14 +91,14 @@ contract OneSplitAaveView is OneSplitViewWrapBase {
 }
 
 
-contract OneSplitAave is OneSplitBaseWrap {
+abstract contract OneSplitAave is OneSplitBaseWrap {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         _aaveSwap(
             fromToken,
             destToken,
