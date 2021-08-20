@@ -8,10 +8,10 @@ import "./UniversalERC20.sol";
 contract OneSplitMooniswapTokenBase {
     using SafeMath for uint256;
     using Math for uint256;
-    using UniversalERC20 for IERC20;
+    using UniversalERC20 for ERC20;
 
     struct TokenInfo {
-        IERC20 token;
+        ERC20 token;
         uint256 reserve;
     }
 
@@ -22,22 +22,22 @@ contract OneSplitMooniswapTokenBase {
 
     function _getPoolDetails(IMooniswap pool) internal view returns (PoolDetails memory details) {
         for (uint i = 0; i < 2; i++) {
-            IERC20 token = pool.tokens(i);
+            ERC20 token = pool.tokens(i);
             details.tokens[i] = TokenInfo({
                 token: token,
                 reserve: token.universalBalanceOf(address(pool))
             });
         }
 
-        details.totalSupply = IERC20(address(pool)).totalSupply();
+        details.totalSupply = ERC20(address(pool)).totalSupply();
     }
 }
 
 
 abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMooniswapTokenBase {
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 toToken,
+        ERC20 fromToken,
+        ERC20 toToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -124,8 +124,8 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
     }
 
     function _getExpectedReturnFromMooniswapPoolToken(
-        IERC20 poolToken,
-        IERC20 toToken,
+        ERC20 poolToken,
+        ERC20 toToken,
         uint256 amount,
         uint256 parts,
         uint256 flags
@@ -171,8 +171,8 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
     }
 
     function _getExpectedReturnToMooniswapPoolToken(
-        IERC20 fromToken,
-        IERC20 poolToken,
+        ERC20 fromToken,
+        ERC20 poolToken,
         uint256 amount,
         uint256 parts,
         uint256 flags
@@ -232,8 +232,8 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
 
 abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapTokenBase {
     function _swap(
-        IERC20 fromToken,
-        IERC20 toToken,
+        ERC20 fromToken,
+        ERC20 toToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -308,13 +308,13 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
     }
 
     function _swapFromMooniswapToken(
-        IERC20 poolToken,
-        IERC20 toToken,
+        ERC20 poolToken,
+        ERC20 toToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
     ) private {
-        IERC20[2] memory tokens = [
+        ERC20[2] memory tokens = [
             IMooniswap(address(poolToken)).tokens(0),
             IMooniswap(address(poolToken)).tokens(1)
         ];
@@ -346,13 +346,13 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
     }
 
     function _swapToMooniswapToken(
-        IERC20 fromToken,
-        IERC20 poolToken,
+        ERC20 fromToken,
+        ERC20 poolToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
     ) private {
-        IERC20[2] memory tokens = [
+        ERC20[2] memory tokens = [
             IMooniswap(address(poolToken)).tokens(0),
             IMooniswap(address(poolToken)).tokens(1)
         ];

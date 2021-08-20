@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interface/IBalancerPool.sol";
 import "./BalancerLib.sol";
 
@@ -11,8 +11,8 @@ contract BalancerHelper {
 
     function getReturns(
         IBalancerPool pool,
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256[] calldata amounts
     )
         external

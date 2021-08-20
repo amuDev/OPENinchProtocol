@@ -27,8 +27,8 @@ contract OneSplitIearnBase {
 
 abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -53,8 +53,8 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
     }
 
     function _iearnGetExpectedReturn(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -76,7 +76,7 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
             IIearn[13] memory yTokens = _yTokens();
 
             for (uint i = 0; i < yTokens.length; i++) {
-                if (fromToken == IERC20(yTokens[i])) {
+                if (fromToken == ERC20(yTokens[i])) {
                     (returnAmount, estimateGasAmount, distribution) = _iearnGetExpectedReturn(
                         yTokens[i].token(),
                         destToken,
@@ -92,9 +92,9 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
             }
 
             for (uint i = 0; i < yTokens.length; i++) {
-                if (destToken == IERC20(yTokens[i])) {
+                if (destToken == ERC20(yTokens[i])) {
                     uint256 _destTokenEthPriceTimesGasPrice = destTokenEthPriceTimesGasPrice;
-                    IERC20 token = yTokens[i].token();
+                    ERC20 token = yTokens[i].token();
                     (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                         fromToken,
                         token,
@@ -131,8 +131,8 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
 
 abstract contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
     function _swap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -147,8 +147,8 @@ abstract contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
     }
 
     function _iearnSwap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -161,8 +161,8 @@ abstract contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
             IIearn[13] memory yTokens = _yTokens();
 
             for (uint i = 0; i < yTokens.length; i++) {
-                if (fromToken == IERC20(yTokens[i])) {
-                    IERC20 underlying = yTokens[i].token();
+                if (fromToken == ERC20(yTokens[i])) {
+                    ERC20 underlying = yTokens[i].token();
                     yTokens[i].withdraw(amount);
                     _iearnSwap(underlying, destToken, underlying.balanceOf(address(this)), distribution, flags);
                     return;
@@ -170,8 +170,8 @@ abstract contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
             }
 
             for (uint i = 0; i < yTokens.length; i++) {
-                if (destToken == IERC20(yTokens[i])) {
-                    IERC20 underlying = yTokens[i].token();
+                if (destToken == ERC20(yTokens[i])) {
+                    ERC20 underlying = yTokens[i].token();
                     super._swap(fromToken, underlying, amount, distribution, flags);
 
                     uint256 underlyingBalance = underlying.balanceOf(address(this));

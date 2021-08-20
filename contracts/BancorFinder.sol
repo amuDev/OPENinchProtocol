@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interface/IBancorContractRegistry.sol";
 import "./interface/IBancorConverterRegistry.sol";
 import "./UniversalERC20.sol";
 
 
 contract BancorFinder {
-    using UniversalERC20 for IERC20;
+    using UniversalERC20 for ERC20;
 
-    IERC20 constant internal ETH_ADDRESS = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
-    IERC20 constant internal bnt = IERC20(0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C);
+    ERC20 constant internal ETH_ADDRESS = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    ERC20 constant internal bnt = ERC20(0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C);
     IBancorContractRegistry constant internal bancorContractRegistry = IBancorContractRegistry(0x52Ae12ABe5D8BD778BD5397F99cA900624CfADD4);
 
     function buildBancorPath(
-        IERC20 fromToken,
-        IERC20 destToken
+        ERC20 fromToken,
+        ERC20 destToken
     )
         public
         view

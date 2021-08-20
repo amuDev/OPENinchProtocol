@@ -8,7 +8,7 @@ import "./IOneSplit.sol";
 import "./UniversalERC20.sol";
 
 
-abstract contract IFreeFromUpTo is IERC20 {
+abstract contract IFreeFromUpTo is ERC20 {
     function freeFromUpTo(address from, uint256 value) virtual external returns(uint256 freed);
 }
 
@@ -22,11 +22,11 @@ interface IReferralGasSponsor {
 
 
 library Array {
-    function first(IERC20[] memory arr) internal pure returns(IERC20) {
+    function first(ERC20[] memory arr) internal pure returns(ERC20) {
         return arr[0];
     }
 
-    function last(IERC20[] memory arr) internal pure returns(IERC20) {
+    function last(ERC20[] memory arr) internal pure returns(ERC20) {
         return arr[arr.length - 1];
     }
 }
@@ -44,8 +44,8 @@ library Array {
 //
 contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     using SafeMath for uint256;
-    using UniversalERC20 for IERC20;
-    using Array for IERC20[];
+    using UniversalERC20 for ERC20;
+    using Array for ERC20[];
 
     IWETH constant internal weth = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
@@ -55,8 +55,8 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     event ImplementationUpdated(address indexed newImpl);
 
     event Swapped(
-        IERC20 indexed fromToken,
-        IERC20 indexed destToken,
+        ERC20 indexed fromToken,
+        ERC20 indexed destToken,
         uint256 fromTokenAmount,
         uint256 destTokenAmount,
         uint256 minReturn,
@@ -80,16 +80,16 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     }
 
     /// @notice Calculate expected returning amount of `destToken`
-    /// @param fromToken (IERC20) Address of token or `address(0)` for Ether
-    /// @param destToken (IERC20) Address of token or `address(0)` for Ether
+    /// @param fromToken (ERC20) Address of token or `address(0)` for Ether
+    /// @param destToken (ERC20) Address of token or `address(0)` for Ether
     /// @param amount (uint256) Amount for `fromToken`
     /// @param parts (uint256) Number of pieces source volume could be splitted,
     /// works like granularity, higly affects gas usage. Should be called offchain,
     /// but could be called onchain if user swaps not his own funds, but this is still considered as not safe.
     /// @param flags (uint256) Flags for enabling and disabling some features, default 0
     function getExpectedReturn(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags // See contants in IOneSplit.sol
@@ -113,8 +113,8 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     }
 
     /// @notice Calculate expected returning amount of `destToken`
-    /// @param fromToken (IERC20) Address of token or `address(0)` for Ether
-    /// @param destToken (IERC20) Address of token or `address(0)` for Ether
+    /// @param fromToken (ERC20) Address of token or `address(0)` for Ether
+    /// @param destToken (ERC20) Address of token or `address(0)` for Ether
     /// @param amount (uint256) Amount for `fromToken`
     /// @param parts (uint256) Number of pieces source volume could be splitted,
     /// works like granularity, higly affects gas usage. Should be called offchain,
@@ -122,8 +122,8 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     /// @param flags (uint256) Flags for enabling and disabling some features, default 0
     /// @param destTokenEthPriceTimesGasPrice (uint256) destToken price to ETH multiplied by gas price
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
@@ -151,13 +151,13 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     /// @notice Calculate expected returning amount of first `tokens` element to
     /// last `tokens` element through ann the middle tokens with corresponding
     /// `parts`, `flags` and `destTokenEthPriceTimesGasPrices` array values of each step
-    /// @param tokens (IERC20[]) Address of token or `address(0)` for Ether
+    /// @param tokens (ERC20[]) Address of token or `address(0)` for Ether
     /// @param amount (uint256) Amount for `fromToken`
     /// @param parts (uint256[]) Number of pieces source volume could be splitted
     /// @param flags (uint256[]) Flags for enabling and disabling some features, default 0
     /// @param destTokenEthPriceTimesGasPrices (uint256[]) destToken price to ETH multiplied by gas price
     function getExpectedReturnWithGasMulti(
-        IERC20[] memory tokens,
+        ERC20[] memory tokens,
         uint256 amount,
         uint256[] memory parts,
         uint256[] memory flags,
@@ -181,15 +181,15 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     }
 
     /// @notice Swap `amount` of `fromToken` to `destToken`
-    /// @param fromToken (IERC20) Address of token or `address(0)` for Ether
-    /// @param destToken (IERC20) Address of token or `address(0)` for Ether
+    /// @param fromToken (ERC20) Address of token or `address(0)` for Ether
+    /// @param destToken (ERC20) Address of token or `address(0)` for Ether
     /// @param amount (uint256) Amount for `fromToken`
     /// @param minReturn (uint256) Minimum expected return, else revert
     /// @param distribution (uint256[]) Array of weights for volume distribution returned by `getExpectedReturn`
     /// @param flags (uint256) Flags for enabling and disabling some features, default 0
     function swap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,
@@ -208,8 +208,8 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     }
 
     /// @notice Swap `amount` of `fromToken` to `destToken`
-    /// param fromToken (IERC20) Address of token or `address(0)` for Ether
-    /// param destToken (IERC20) Address of token or `address(0)` for Ether
+    /// param fromToken (ERC20) Address of token or `address(0)` for Ether
+    /// param destToken (ERC20) Address of token or `address(0)` for Ether
     /// @param amount (uint256) Amount for `fromToken`
     /// @param minReturn (uint256) Minimum expected return, else revert
     /// @param distribution (uint256[]) Array of weights for volume distribution returned by `getExpectedReturn`
@@ -217,8 +217,8 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     /// @param referral (address) Address of referral
     /// @param feePercent (uint256) Fees percents normalized to 1e18, limited to 0.03e18 (3%)
     function swapWithReferral(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,
@@ -226,7 +226,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         address referral,
         uint256 feePercent
     ) public payable returns(uint256) {
-        IERC20[] memory tokens = new IERC20[](2);
+        ERC20[] memory tokens = new ERC20[](2);
         tokens[0] = fromToken;
         tokens[1] = destToken;
 
@@ -245,13 +245,13 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     }
 
     /// @notice Swap `amount` of first element of `tokens` to the latest element of `destToken`
-    /// @param tokens (IERC20[]) Addresses of token or `address(0)` for Ether
+    /// @param tokens (ERC20[]) Addresses of token or `address(0)` for Ether
     /// @param amount (uint256) Amount for `fromToken`
     /// @param minReturn (uint256) Minimum expected return, else revert
     /// @param distribution (uint256[]) Array of weights for volume distribution returned by `getExpectedReturn`
     /// @param flags (uint256[]) Flags for enabling and disabling some features, default 0
     function swapMulti(
-        IERC20[] memory tokens,
+        ERC20[] memory tokens,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,
@@ -269,7 +269,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     }
 
     /// @notice Swap `amount` of first element of `tokens` to the latest element of `destToken`
-    /// @param tokens (IERC20[]) Addresses of token or `address(0)` for Ether
+    /// @param tokens (ERC20[]) Addresses of token or `address(0)` for Ether
     /// @param amount (uint256) Amount for `fromToken`
     /// @param minReturn (uint256) Minimum expected return, else revert
     /// @param distribution (uint256[]) Array of weights for volume distribution returned by `getExpectedReturn`
@@ -277,7 +277,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     /// @param referral (address) Address of referral
     /// @param feePercent (uint256) Fees percents normalized to 1e18, limited to 0.03e18 (3%)
     function swapWithReferralMulti(
-        IERC20[] memory tokens,
+        ERC20[] memory tokens,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,
@@ -352,7 +352,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         }
     }
 
-    function claimAsset(IERC20 asset, uint256 amount) public onlyOwner {
+    function claimAsset(ERC20 asset, uint256 amount) public onlyOwner {
         asset.universalTransfer(msg.sender, amount);
     }
 
@@ -377,7 +377,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         uint256 ofDestToken;
     }
 
-    function _getFirstAndLastBalances(IERC20[] memory tokens, bool subValue) internal view returns(Balances memory) {
+    function _getFirstAndLastBalances(ERC20[] memory tokens, bool subValue) internal view returns(Balances memory) {
         return Balances({
             ofFromToken: tokens.first().universalBalanceOf(address(this)).sub(subValue ? msg.value : 0),
             ofDestToken: tokens.last().universalBalanceOf(address(this))

@@ -7,7 +7,7 @@ import "./OneSplitBase.sol";
 contract OneSplitDMMBase {
     IDMMController internal constant _dmmController = IDMMController(0x4CB120Dd1D33C9A3De8Bc15620C7Cd43418d77E2);
 
-    function _getDMMUnderlyingToken(IERC20 token) internal view returns(IERC20) {
+    function _getDMMUnderlyingToken(ERC20 token) internal view returns(ERC20) {
         (bool success, bytes memory data) = address(_dmmController).staticcall(
             abi.encodeWithSelector(
                 _dmmController.getUnderlyingTokenForDmm.selector,
@@ -16,10 +16,10 @@ contract OneSplitDMMBase {
         );
 
         if (!success || data.length == 0) {
-            return IERC20(-1);
+            return ERC20(-1);
         }
 
-        return abi.decode(data, (IERC20));
+        return abi.decode(data, (ERC20));
     }
 
     function _getDMMExchangeRate(IDMM dmm) internal view returns(uint256) {
@@ -40,8 +40,8 @@ contract OneSplitDMMBase {
 
 abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -66,8 +66,8 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
     }
 
     function _dmmGetExpectedReturn(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -86,12 +86,12 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_DMM)) {
-            IERC20 underlying = _getDMMUnderlyingToken(fromToken);
-            if (underlying != IERC20(-1)) {
+            ERC20 underlying = _getDMMUnderlyingToken(fromToken);
+            if (underlying != ERC20(-1)) {
                 if (underlying == weth) {
                     underlying = ETH_ADDRESS;
                 }
-                IERC20 _fromToken = fromToken;
+                ERC20 _fromToken = fromToken;
                 (returnAmount, estimateGasAmount, distribution) = _dmmGetExpectedReturn(
                     underlying,
                     destToken,
@@ -104,7 +104,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
             }
 
             underlying = _getDMMUnderlyingToken(destToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != ERC20(-1)) {
                 if (underlying == weth) {
                     underlying = ETH_ADDRESS;
                 }
@@ -139,8 +139,8 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
 
 abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
     function _swap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -155,8 +155,8 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
     }
 
     function _dmmSwap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -166,8 +166,8 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_DMM)) {
-            IERC20 underlying = _getDMMUnderlyingToken(fromToken);
-            if (underlying != IERC20(-1)) {
+            ERC20 underlying = _getDMMUnderlyingToken(fromToken);
+            if (underlying != ERC20(-1)) {
                 IDMM(address(fromToken)).redeem(amount);
                 uint256 balance = underlying.universalBalanceOf(address(this));
                 if (underlying == weth) {
@@ -183,7 +183,7 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
             }
 
             underlying = _getDMMUnderlyingToken(destToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != ERC20(-1)) {
                 super._swap(
                     fromToken,
                     (underlying == weth) ? ETH_ADDRESS : underlying,

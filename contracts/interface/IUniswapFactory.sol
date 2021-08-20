@@ -4,5 +4,5 @@ import "./IUniswapExchange.sol";
 
 
 interface IUniswapFactory {
-    function getExchange(IERC20 token) external view returns (IUniswapExchange exchange);
+    function getExchange(ERC20 token) external view returns (IUniswapExchange exchange);
 }

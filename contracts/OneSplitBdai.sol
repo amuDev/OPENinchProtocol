@@ -7,14 +7,14 @@ import "./IOneSplit.sol";
 
 contract OneSplitBdaiBase {
     IBdai internal constant bdai = IBdai(0x6a4FFAafa8DD400676Df8076AD6c724867b0e2e8);
-    IERC20 internal constant btu = IERC20(0xb683D83a532e2Cb7DFa5275eED3698436371cc9f);
+    ERC20 internal constant btu = ERC20(0xb683D83a532e2Cb7DFa5275eED3698436371cc9f);
 }
 
 
 abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -33,7 +33,7 @@ abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_BDAI)) {
-            if (fromToken == IERC20(bdai)) {
+            if (fromToken == ERC20(bdai)) {
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     dai,
                     destToken,
@@ -45,7 +45,7 @@ abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
                 return (returnAmount, estimateGasAmount + 227_000, distribution);
             }
 
-            if (destToken == IERC20(bdai)) {
+            if (destToken == ERC20(bdai)) {
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     fromToken,
                     dai,
@@ -72,8 +72,8 @@ abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
 
 abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
     function _swap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -83,7 +83,7 @@ abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_BDAI)) {
-            if (fromToken == IERC20(bdai)) {
+            if (fromToken == ERC20(bdai)) {
                 bdai.exit(amount);
 
                 uint256 btuBalance = btu.balanceOf(address(this));
@@ -114,7 +114,7 @@ abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
                 );
             }
 
-            if (destToken == IERC20(bdai)) {
+            if (destToken == ERC20(bdai)) {
                 super._swap(fromToken, dai, amount, distribution, flags);
 
                 uint256 daiBalance = dai.balanceOf(address(this));

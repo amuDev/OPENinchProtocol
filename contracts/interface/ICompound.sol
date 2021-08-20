@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 
 interface ICompound {
@@ -11,7 +11,7 @@ interface ICompound {
 }
 
 
-interface ICompoundToken is IERC20 {
+interface ICompoundToken is ERC20 {
     function underlying() external view returns (address);
 
     function exchangeRateStored() external view returns (uint256);
@@ -22,7 +22,7 @@ interface ICompoundToken is IERC20 {
 }
 
 
-interface ICompoundEther is IERC20 {
+interface ICompoundEther is ERC20 {
     function mint() external payable;
 
     function redeem(uint256 redeemTokens) external returns (uint256);

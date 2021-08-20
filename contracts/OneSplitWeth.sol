@@ -6,8 +6,8 @@ import "./OneSplitBase.sol";
 
 abstract contract OneSplitWethView is OneSplitViewWrapBase {
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -32,8 +32,8 @@ abstract contract OneSplitWethView is OneSplitViewWrapBase {
     }
 
     function _wethGetExpectedReturn(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -75,8 +75,8 @@ abstract contract OneSplitWethView is OneSplitViewWrapBase {
 
 abstract contract OneSplitWeth is OneSplitBaseWrap {
     function _swap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -91,8 +91,8 @@ abstract contract OneSplitWeth is OneSplitBaseWrap {
     }
 
     function _wethSwap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags

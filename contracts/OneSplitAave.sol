@@ -6,8 +6,8 @@ import "./OneSplitBase.sol";
 
 abstract contract OneSplitAaveView is OneSplitViewWrapBase {
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
@@ -32,8 +32,8 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
     }
 
     function _aaveGetExpectedReturn(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -52,8 +52,8 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_AAVE)) {
-            IERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            ERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
+            if (underlying != ERC20(0)) {
                 (returnAmount, estimateGasAmount, distribution) = _aaveGetExpectedReturn(
                     underlying,
                     destToken,
@@ -66,7 +66,7 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
             }
 
             underlying = aaveRegistry.tokenByAToken(IAaveToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != ERC20(0)) {
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     fromToken,
                     underlying,
@@ -93,8 +93,8 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
 
 abstract contract OneSplitAave is OneSplitBaseWrap {
     function _swap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -109,8 +109,8 @@ abstract contract OneSplitAave is OneSplitBaseWrap {
     }
 
     function _aaveSwap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -120,8 +120,8 @@ abstract contract OneSplitAave is OneSplitBaseWrap {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_AAVE)) {
-            IERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            ERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
+            if (underlying != ERC20(0)) {
                 IAaveToken(address(fromToken)).redeem(amount);
 
                 return _aaveSwap(
@@ -134,7 +134,7 @@ abstract contract OneSplitAave is OneSplitBaseWrap {
             }
 
             underlying = aaveRegistry.tokenByAToken(IAaveToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != ERC20(0)) {
                 super._swap(
                     fromToken,
                     underlying,

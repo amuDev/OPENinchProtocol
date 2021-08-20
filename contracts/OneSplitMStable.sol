@@ -6,8 +6,8 @@ import "./OneSplitBase.sol";
 
 abstract contract OneSplitMStableView is OneSplitViewWrapBase {
     function getExpectedReturnWithGas(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -26,7 +26,7 @@ abstract contract OneSplitMStableView is OneSplitViewWrapBase {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_MSTABLE_MUSD)) {
-            if (fromToken == IERC20(musd)) {
+            if (fromToken == ERC20(musd)) {
                 {
                     (bool valid1,, uint256 res1,) = musd_helper.getRedeemValidity(musd, amount, destToken);
                     if (valid1) {
@@ -36,10 +36,10 @@ abstract contract OneSplitMStableView is OneSplitViewWrapBase {
 
                 (bool valid,, address token) = musd_helper.suggestRedeemAsset(musd);
                 if (valid) {
-                    (,, returnAmount,) = musd_helper.getRedeemValidity(musd, amount, IERC20(token));
-                    if (IERC20(token) != destToken) {
+                    (,, returnAmount,) = musd_helper.getRedeemValidity(musd, amount, ERC20(token));
+                    if (ERC20(token) != destToken) {
                         (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
-                            IERC20(token),
+                            ERC20(token),
                             destToken,
                             returnAmount,
                             parts,
@@ -54,32 +54,32 @@ abstract contract OneSplitMStableView is OneSplitViewWrapBase {
                 }
             }
 
-            if (destToken == IERC20(musd)) {
+            if (destToken == ERC20(musd)) {
                 if (fromToken == usdc || fromToken == dai || fromToken == usdt || fromToken == tusd) {
                     (,, returnAmount) = musd.getSwapOutput(fromToken, destToken, amount);
                     return (returnAmount, 300_000, new uint256[](DEXES_COUNT));
                 }
                 else {
-                    IERC20 _destToken = destToken;
+                    ERC20 _destToken = destToken;
                     (bool valid,, address token) = musd_helper.suggestMintAsset(_destToken);
                     if (valid) {
-                        if (IERC20(token) != fromToken) {
+                        if (ERC20(token) != fromToken) {
                             (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                                 fromToken,
-                                IERC20(token),
+                                ERC20(token),
                                 amount,
                                 parts,
                                 flags,
                                 _scaleDestTokenEthPriceTimesGasPrice(
                                     _destToken,
-                                    IERC20(token),
+                                    ERC20(token),
                                     destTokenEthPriceTimesGasPrice
                                 )
                             );
                         } else {
                             returnAmount = amount;
                         }
-                        (,, returnAmount) = musd.getSwapOutput(IERC20(token), _destToken, returnAmount);
+                        (,, returnAmount) = musd.getSwapOutput(ERC20(token), _destToken, returnAmount);
                         return (returnAmount, estimateGasAmount + 300_000, distribution);
                     }
                 }
@@ -100,8 +100,8 @@ abstract contract OneSplitMStableView is OneSplitViewWrapBase {
 
 abstract contract OneSplitMStable is OneSplitBaseWrap {
     function _swap(
-        IERC20 fromToken,
-        IERC20 destToken,
+        ERC20 fromToken,
+        ERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -111,7 +111,7 @@ abstract contract OneSplitMStable is OneSplitBaseWrap {
         }
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_MSTABLE_MUSD)) {
-            if (fromToken == IERC20(musd)) {
+            if (fromToken == ERC20(musd)) {
                 if (destToken == usdc || destToken == dai || destToken == usdt || destToken == tusd) {
                     (,,, uint256 result) = musd_helper.getRedeemValidity(fromToken, amount, destToken);
                     musd.redeem(
@@ -136,7 +136,7 @@ abstract contract OneSplitMStable is OneSplitBaseWrap {
                 return;
             }
 
-            if (destToken == IERC20(musd)) {
+            if (destToken == ERC20(musd)) {
                 if (fromToken == usdc || fromToken == dai || fromToken == usdt || fromToken == tusd) {
                     fromToken.universalApprove(address(musd), amount);
                     musd.swap(

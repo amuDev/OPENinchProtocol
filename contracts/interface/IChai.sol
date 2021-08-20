@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 
 interface IPot {
@@ -18,7 +18,7 @@ interface IPot {
 }
 
 
-interface IChai is IERC20 {
+interface IChai is ERC20 {
     function POT() external view returns (IPot);
 
     function join(address dst, uint256 wad) external;
