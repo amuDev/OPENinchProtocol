@@ -336,6 +336,9 @@ abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
 
 
 contract OneSplitView is IOneSplitView, OneSplitRoot {
+
+    using SafeMath for uint256;
+    
     function getExpectedReturn(
         IERC20 fromToken,
         IERC20 destToken,

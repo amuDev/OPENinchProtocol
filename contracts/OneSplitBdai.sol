@@ -11,7 +11,7 @@ contract OneSplitBdaiBase {
 }
 
 
-contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
+abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -19,7 +19,7 @@ contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -70,14 +70,14 @@ contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
 }
 
 
-contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
+abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         if (fromToken == destToken) {
             return;
         }
@@ -88,7 +88,7 @@ contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
 
                 uint256 btuBalance = btu.balanceOf(address(this));
                 if (btuBalance > 0) {
-                    (,uint256[] memory btuDistribution) = super.getExpectedReturn( //TODO: ?
+                    (,uint256[] memory btuDistribution) = super.getExpectedReturn(
                         btu,
                         destToken,
                         btuBalance,
