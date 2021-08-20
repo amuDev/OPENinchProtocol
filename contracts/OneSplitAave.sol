@@ -51,7 +51,7 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_AAVE)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_AAVE)) {
             ERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
             if (underlying != ERC20(0)) {
                 (returnAmount, estimateGasAmount, distribution) = _aaveGetExpectedReturn(
@@ -119,7 +119,7 @@ abstract contract OneSplitAave is OneSplitBaseWrap {
             return;
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_AAVE)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_AAVE)) {
             ERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
             if (underlying != ERC20(0)) {
                 IAaveToken(address(fromToken)).redeem(amount);

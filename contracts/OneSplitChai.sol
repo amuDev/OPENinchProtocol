@@ -25,7 +25,7 @@ abstract contract OneSplitChaiView is OneSplitViewWrapBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_CHAI)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_CHAI)) {
             if (fromToken == ERC20(chai)) {
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     dai,
@@ -76,7 +76,7 @@ abstract contract OneSplitChai is OneSplitBaseWrap {
             return;
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_CHAI)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_CHAI)) {
             if (fromToken == ERC20(chai)) {
                 chai.exit(address(this), amount);
 

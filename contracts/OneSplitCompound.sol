@@ -51,7 +51,7 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_COMPOUND)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_COMPOUND)) {
             ERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
             if (underlying != ERC20(0)) {
                 uint256 compoundRate = ICompoundToken(address(fromToken)).exchangeRateStored();
@@ -122,7 +122,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
             return;
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_COMPOUND)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_COMPOUND)) {
             ERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
             if (underlying != ERC20(0)) {
                 ICompoundToken(address(fromToken)).redeem(amount);

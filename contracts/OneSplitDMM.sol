@@ -85,7 +85,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_DMM)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_DMM)) {
             ERC20 underlying = _getDMMUnderlyingToken(fromToken);
             if (underlying != ERC20(-1)) {
                 if (underlying == weth) {
@@ -165,7 +165,7 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
             return;
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_DMM)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_DMM)) {
             ERC20 underlying = _getDMMUnderlyingToken(fromToken);
             if (underlying != ERC20(-1)) {
                 IDMM(address(fromToken)).redeem(amount);

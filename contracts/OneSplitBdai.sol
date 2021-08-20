@@ -32,7 +32,7 @@ abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_BDAI)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_BDAI)) {
             if (fromToken == ERC20(bdai)) {
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     dai,
@@ -82,7 +82,7 @@ abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
             return;
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_BDAI)) {
+        if (DisableDisableFlags.check(flags, flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableDisableFlags.check(flags, flags, FLAG_DISABLE_BDAI)) {
             if (fromToken == ERC20(bdai)) {
                 bdai.exit(amount);
 

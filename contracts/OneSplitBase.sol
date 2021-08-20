@@ -65,7 +65,7 @@ interface IOneSplitView {
 
 
 library DisableFlags {
-    function check(uint256 flags, uint256 flag) internal pure returns(bool) {
+    function check(uint256 flags, uint256 flag) internal returns(bool) {
         return (flags & flag) != 0;
     }
 }
