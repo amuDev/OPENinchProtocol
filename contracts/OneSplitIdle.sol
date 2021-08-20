@@ -25,8 +25,8 @@ contract OneSplitIdleBase {
 
 abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
     function getExpectedReturnWithGas(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -51,8 +51,8 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
     }
 
     function _idleGetExpectedReturn(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -74,7 +74,7 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
             IIdle[8] memory tokens = _idleTokens();
 
             for (uint i = 0; i < tokens.length; i++) {
-                if (fromToken == ERC20(tokens[i])) {
+                if (fromToken == IERC20(tokens[i])) {
                     (returnAmount, estimateGasAmount, distribution) = _idleGetExpectedReturn(
                         tokens[i].token(),
                         destToken,
@@ -88,10 +88,10 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
             }
 
             for (uint i = 0; i < tokens.length; i++) {
-                if (destToken == ERC20(tokens[i])) {
+                if (destToken == IERC20(tokens[i])) {
                     uint256 _destTokenEthPriceTimesGasPrice = destTokenEthPriceTimesGasPrice;
                     uint256 _price = tokens[i].tokenPrice();
-                    ERC20 token = tokens[i].token();
+                    IERC20 token = tokens[i].token();
                     (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                         fromToken,
                         token,
@@ -119,8 +119,8 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
 
 abstract contract OneSplitIdle is OneSplitBaseWrap, OneSplitIdleBase {
     function _swap(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -135,8 +135,8 @@ abstract contract OneSplitIdle is OneSplitBaseWrap, OneSplitIdleBase {
     }
 
     function _idleSwap(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -145,8 +145,8 @@ abstract contract OneSplitIdle is OneSplitBaseWrap, OneSplitIdleBase {
             IIdle[8] memory tokens = _idleTokens();
 
             for (uint i = 0; i < tokens.length; i++) {
-                if (fromToken == ERC20(tokens[i])) {
-                    ERC20 underlying = tokens[i].token();
+                if (fromToken == IERC20(tokens[i])) {
+                    IERC20 underlying = tokens[i].token();
                     uint256 minted = tokens[i].redeemIdleToken(amount, true, new uint256[](0));
                     _idleSwap(underlying, destToken, minted, distribution, flags);
                     return;
@@ -154,8 +154,8 @@ abstract contract OneSplitIdle is OneSplitBaseWrap, OneSplitIdleBase {
             }
 
             for (uint i = 0; i < tokens.length; i++) {
-                if (destToken == ERC20(tokens[i])) {
-                    ERC20 underlying = tokens[i].token();
+                if (destToken == IERC20(tokens[i])) {
+                    IERC20 underlying = tokens[i].token();
                     super._swap(fromToken, underlying, amount, distribution, flags);
 
                     uint256 underlyingBalance = underlying.balanceOf(address(this));

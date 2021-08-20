@@ -36,8 +36,8 @@ contract OneSplitViewWrap is
     }
 
     function getExpectedReturn(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags
@@ -60,8 +60,8 @@ contract OneSplitViewWrap is
     }
 
     function getExpectedReturnWithGas(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
@@ -101,8 +101,8 @@ contract OneSplitViewWrap is
     }
 
     function _getExpectedReturnRespectingGasFloor(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -156,8 +156,8 @@ contract OneSplitWrap is
     }
 
     function getExpectedReturn(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags
@@ -180,8 +180,8 @@ contract OneSplitWrap is
     }
 
     function getExpectedReturnWithGas(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -206,7 +206,7 @@ contract OneSplitWrap is
     }
 
     function getExpectedReturnWithGasMulti(
-        ERC20[] memory tokens,
+        IERC20[] memory tokens,
         uint256 amount,
         uint256[] memory parts,
         uint256[] memory flags,
@@ -229,7 +229,7 @@ contract OneSplitWrap is
                 continue;
             }
 
-            ERC20[] memory _tokens = tokens;
+            IERC20[] memory _tokens = tokens;
 
             (
                 returnAmounts[i - 1],
@@ -255,8 +255,8 @@ contract OneSplitWrap is
     }
 
     function swap(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,
@@ -273,7 +273,7 @@ contract OneSplitWrap is
     }
 
     function swapMulti(
-        ERC20[] memory tokens,
+        IERC20[] memory tokens,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,
@@ -308,14 +308,14 @@ contract OneSplitWrap is
     }
 
     function _swapFloor(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
     ) override internal {
         fromToken.universalApprove(address(oneSplit), amount);
-        oneSplit.swap.value(UniversalERC20.isETH(fromToken) ? amount : 0)(
+        oneSplit.swap.value(UniversalIERC20.isETH(fromToken) ? amount : 0)(
             fromToken,
             destToken,
             amount,

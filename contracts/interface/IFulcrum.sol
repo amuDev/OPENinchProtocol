@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
 
 
-interface IFulcrumToken is ERC20 {
+interface IFulcrumToken is IERC20 {
     function tokenPrice() external view returns (uint256);
 
     function loanTokenAddress() external view returns (address);

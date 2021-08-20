@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
 import "./interface/IBancorContractRegistry.sol";
 import "./interface/IBancorConverterRegistry.sol";
-import "./UniversalERC20.sol";
+import "./UniversalIERC20.sol";
 
 
 contract BancorFinder {
-    using UniversalERC20 for ERC20;
+    using UniversalIERC20 for IERC20;
 
-    ERC20 constant internal ETH_ADDRESS = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
-    ERC20 constant internal bnt = ERC20(0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C);
+    IERC20 constant internal ETH_ADDRESS = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 constant internal bnt = IERC20(0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C);
     IBancorContractRegistry constant internal bancorContractRegistry = IBancorContractRegistry(0x52Ae12ABe5D8BD778BD5397F99cA900624CfADD4);
 
     function buildBancorPath(
-        ERC20 fromToken,
-        ERC20 destToken
+        IERC20 fromToken,
+        IERC20 destToken
     )
         public
         view
@@ -25,10 +25,10 @@ contract BancorFinder {
             return new address[](0);
         }
 
-        if (UniversalERC20.isETH(fromToken)) {
+        if (UniversalIERC20.isETH(fromToken)) {
             fromToken = ETH_ADDRESS;
         }
-        if (UniversalERC20.isETH(destToken)) {
+        if (UniversalIERC20.isETH(destToken)) {
             destToken = ETH_ADDRESS;
         }
 
@@ -48,7 +48,7 @@ contract BancorFinder {
         if (fromToken != bnt) {
             (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
-                UniversalERC20.isETH(fromToken) ? ETH_ADDRESS : fromToken,
+                UniversalIERC20.isETH(fromToken) ? ETH_ADDRESS : fromToken,
                 0
             ));
             if (!success) {
@@ -64,7 +64,7 @@ contract BancorFinder {
         if (destToken != bnt) {
             (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
-                UniversalERC20.isETH(destToken) ? ETH_ADDRESS : destToken,
+                UniversalIERC20.isETH(destToken) ? ETH_ADDRESS : destToken,
                 0
             ));
             if (!success) {

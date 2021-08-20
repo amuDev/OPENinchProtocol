@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
 
 
-interface IMStable is ERC20 {
+interface IMStable is IERC20 {
     function getSwapOutput(
-        ERC20 _input,
-        ERC20 _output,
+        IERC20 _input,
+        IERC20 _output,
         uint256 _quantity
     )
         external
@@ -14,8 +14,8 @@ interface IMStable is ERC20 {
         returns (bool, string memory, uint256 output);
 
     function swap(
-        ERC20 _input,
-        ERC20 _output,
+        IERC20 _input,
+        IERC20 _output,
         uint256 _quantity,
         address _recipient
     )
@@ -23,7 +23,7 @@ interface IMStable is ERC20 {
         returns (uint256 output);
 
     function redeem(
-        ERC20 _basset,
+        IERC20 _basset,
         uint256 _bassetQuantity
     )
         external
@@ -39,7 +39,7 @@ interface IMassetValidationHelper {
      * @return address of bAsset to redeem
      */
     function suggestRedeemAsset(
-        ERC20 _mAsset
+        IERC20 _mAsset
     )
         external
         view
@@ -57,7 +57,7 @@ interface IMassetValidationHelper {
      * @return address of bAsset to mint
      */
     function suggestMintAsset(
-        ERC20 _mAsset
+        IERC20 _mAsset
     )
         external
         view
@@ -78,9 +78,9 @@ interface IMassetValidationHelper {
      * @return bAssetQuantityArg - required input argument to the 'redeem' call
      */
     function getRedeemValidity(
-        ERC20 _mAsset,
+        IERC20 _mAsset,
         uint256 _mAssetQuantity,
-        ERC20 _outputBasset
+        IERC20 _outputBasset
     )
         external
         view

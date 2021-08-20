@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
 
 
 interface IBalancerPool {
     function getSwapFee()
         external view returns (uint256 balance);
 
-    function getDenormalizedWeight(ERC20 token)
+    function getDenormalizedWeight(IERC20 token)
         external view returns (uint256 balance);
 
-    function getBalance(ERC20 token)
+    function getBalance(IERC20 token)
         external view returns (uint256 balance);
 
     function swapExactAmountIn(
-        ERC20 tokenIn,
+        IERC20 tokenIn,
         uint256 tokenAmountIn,
-        ERC20 tokenOut,
+        IERC20 tokenOut,
         uint256 minAmountOut,
         uint256 maxPrice
     )
@@ -29,8 +29,8 @@ interface IBalancerPool {
 interface IBalancerHelper {
     function getReturns(
         IBalancerPool pool,
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256[] calldata amounts
     )
         external

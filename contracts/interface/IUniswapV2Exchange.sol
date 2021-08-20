@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../UniversalERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
+import "../UniversalIERC20.sol";
 
 
 interface IUniswapV2Exchange {
@@ -17,12 +17,12 @@ interface IUniswapV2Exchange {
 library UniswapV2ExchangeLib {
     using Math for uint256;
     using SafeMath for uint256;
-    using UniversalERC20 for ERC20;
+    using UniversalIERC20 for IERC20;
 
     function getReturn(
         IUniswapV2Exchange exchange,
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint amountIn
     ) internal view returns (uint256 result, bool needSync, bool needSkim) {
         uint256 reserveIn = fromToken.universalBalanceOf(address(exchange));

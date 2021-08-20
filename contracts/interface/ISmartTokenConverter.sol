@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
 
 
 interface ISmartTokenConverter {
-    function getReserveRatio(ERC20 token) external view returns (uint32);
+    function getReserveRatio(IERC20 token) external view returns (uint32);
 
     function connectorTokenCount() external view returns (uint256);
 
-    function connectorTokens(uint256 i) external view returns (ERC20);
+    function connectorTokens(uint256 i) external view returns (IERC20);
 }

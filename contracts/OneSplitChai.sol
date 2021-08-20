@@ -6,8 +6,8 @@ import "./OneSplitBase.sol";
 
 abstract contract OneSplitChaiView is OneSplitViewWrapBase {
     function getExpectedReturnWithGas(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags,
@@ -26,7 +26,7 @@ abstract contract OneSplitChaiView is OneSplitViewWrapBase {
         }
 
         if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_CHAI)) {
-            if (fromToken == ERC20(chai)) {
+            if (fromToken == IERC20(chai)) {
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     dai,
                     destToken,
@@ -38,7 +38,7 @@ abstract contract OneSplitChaiView is OneSplitViewWrapBase {
                 return (returnAmount, estimateGasAmount + 197_000, distribution);
             }
 
-            if (destToken == ERC20(chai)) {
+            if (destToken == IERC20(chai)) {
                 uint256 price = chai.chaiPrice();
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     fromToken,
@@ -66,8 +66,8 @@ abstract contract OneSplitChaiView is OneSplitViewWrapBase {
 
 abstract contract OneSplitChai is OneSplitBaseWrap {
     function _swap(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
@@ -77,7 +77,7 @@ abstract contract OneSplitChai is OneSplitBaseWrap {
         }
 
         if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_CHAI)) {
-            if (fromToken == ERC20(chai)) {
+            if (fromToken == IERC20(chai)) {
                 chai.exit(address(this), amount);
 
                 return super._swap(
@@ -89,7 +89,7 @@ abstract contract OneSplitChai is OneSplitBaseWrap {
                 );
             }
 
-            if (destToken == ERC20(chai)) {
+            if (destToken == IERC20(chai)) {
                 super._swap(
                     fromToken,
                     dai,

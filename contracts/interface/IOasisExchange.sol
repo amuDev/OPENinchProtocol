@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
 
 
 interface IOasisExchange {
-    function getBuyAmount(ERC20 buyGem, ERC20 payGem, uint256 payAmt)
+    function getBuyAmount(IERC20 buyGem, IERC20 payGem, uint256 payAmt)
         external
         view
         returns (uint256 fillAmt);
 
-    function sellAllAmount(ERC20 payGem, uint256 payAmt, ERC20 buyGem, uint256 minFillAmount)
+    function sellAllAmount(IERC20 payGem, uint256 payAmt, IERC20 buyGem, uint256 minFillAmount)
         external
         returns (uint256 fillAmt);
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/IERC20/IERC20.sol";
 
 //
 //  [ msg.sender ]
@@ -105,8 +105,8 @@ contract IOneSplitConsts {
 
 interface IOneSplit {
     function getExpectedReturn(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags // See constants in IOneSplit.sol
@@ -119,8 +119,8 @@ interface IOneSplit {
         );
 
     function getExpectedReturnWithGas(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
@@ -135,8 +135,8 @@ interface IOneSplit {
         );
 
     function swap(
-        ERC20 fromToken,
-        ERC20 destToken,
+        IERC20 fromToken,
+        IERC20 destToken,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,
@@ -150,7 +150,7 @@ interface IOneSplit {
 
 interface IOneSplitMulti is IOneSplit {
     function getExpectedReturnWithGasMulti(
-        ERC20[] memory tokens,
+        IERC20[] memory tokens,
         uint256 amount,
         uint256[] memory parts,
         uint256[] memory flags,
@@ -165,7 +165,7 @@ interface IOneSplitMulti is IOneSplit {
         );
 
     function swapMulti(
-        ERC20[] memory tokens,
+        IERC20[] memory tokens,
         uint256 amount,
         uint256 minReturn,
         uint256[] memory distribution,

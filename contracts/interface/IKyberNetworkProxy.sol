@@ -5,17 +5,17 @@ import "./IKyberNetworkContract.sol";
 
 interface IKyberNetworkProxy {
     function getExpectedRateAfterFee(
-        ERC20 src,
-        ERC20 dest,
+        IERC20 src,
+        IERC20 dest,
         uint256 srcQty,
         uint256 platformFeeBps,
         bytes calldata hint
     ) external view returns (uint256 expectedRate);
 
     function tradeWithHintAndFee(
-        ERC20 src,
+        IERC20 src,
         uint256 srcAmount,
-        ERC20 dest,
+        IERC20 dest,
         address payable destAddress,
         uint256 maxDestAmount,
         uint256 minConversionRate,
@@ -31,5 +31,5 @@ interface IKyberNetworkProxy {
 
     // TODO: Limit usage by user cap
     // function getUserCapInWei(address user) external view returns (uint256);
-    // function getUserCapInTokenWei(address user, ERC20 token) external view returns (uint256);
+    // function getUserCapInTokenWei(address user, IERC20 token) external view returns (uint256);
 }
