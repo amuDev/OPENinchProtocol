@@ -41,7 +41,7 @@ contract OneSplitViewWrap is
         uint256 amount,
         uint256 parts,
         uint256 flags
-    )
+    ) override
         public
         view
         returns(
@@ -66,7 +66,18 @@ contract OneSplitViewWrap is
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override(OneSplitAaveView, 
+               OneSplitBdaiView, 
+               OneSplitChaiView, 
+               OneSplitCompoundView, 
+               OneSplitDMMView, 
+               OneSplitFulcrumView, 
+               OneSplitIdleView, 
+               OneSplitIearnView, 
+               OneSplitMStableView, 
+               OneSplitMooniswapTokenView, 
+               OneSplitViewWrapBase, 
+               OneSplitWethView) //TODO: this feels wrong
         public
         view
         returns(
@@ -96,7 +107,7 @@ contract OneSplitViewWrap is
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         internal
         view
         returns(
@@ -116,8 +127,8 @@ contract OneSplitViewWrap is
     }
 }
 
-
-contract OneSplitWrap is
+//TODO: ?
+contract OneSplitWrap is 
     OneSplitBaseWrap,
     OneSplitMStable,
     OneSplitChai,
@@ -150,7 +161,7 @@ contract OneSplitWrap is
         uint256 amount,
         uint256 parts,
         uint256 flags
-    )
+    ) override
         public
         view
         returns(
@@ -175,7 +186,7 @@ contract OneSplitWrap is
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    )
+    ) override
         public
         view
         returns(
@@ -250,7 +261,7 @@ contract OneSplitWrap is
         uint256 minReturn,
         uint256[] memory distribution,
         uint256 flags
-    ) public payable returns(uint256 returnAmount) {
+    ) override public payable returns(uint256 returnAmount) {
         fromToken.universalTransferFrom(msg.sender, address(this), amount);
         uint256 confirmed = fromToken.universalBalanceOf(address(this));
         _swap(fromToken, destToken, confirmed, distribution, flags);
@@ -302,7 +313,7 @@ contract OneSplitWrap is
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    ) internal {
+    ) override internal {
         fromToken.universalApprove(address(oneSplit), amount);
         oneSplit.swap.value(fromToken.isETH() ? amount : 0)(
             fromToken,
