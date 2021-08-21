@@ -39,7 +39,7 @@ library UniversalERC20 {
                 payable(to).transfer(amount);
             }
             if (msg.value > amount) {
-                payable(msg.sender).transfer(msg.value.sub(amount));
+                payable(msg.sender).transfer(msg.value - (amount));
             }
         } else {
             token.safeTransferFrom(from, to, amount);
@@ -54,7 +54,7 @@ library UniversalERC20 {
         if (isETH(token)) {
             if (msg.value > amount) {
                 // Return remainder if exist
-                payable(msg.sender).transfer(msg.value.sub(amount));
+                payable(msg.sender).transfer(msg.value - (amount));
             }
         } else {
             token.safeTransferFrom(msg.sender, address(this), amount);

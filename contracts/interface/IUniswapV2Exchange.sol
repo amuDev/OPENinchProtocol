@@ -37,6 +37,6 @@ library UniswapV2ExchangeLib {
         uint256 amountInWithFee = amountIn * (997);
         uint256 numerator = amountInWithFee * (Math.min(reserveOut, reserve1));
         uint256 denominator = Math.min(reserveIn, reserve0) * (1000) + (amountInWithFee);
-        result = (denominator == 0) ? 0 : numerator.div(denominator);
+        result = (denominator == 0) ? 0 : numerator / (denominator);
     }
 }

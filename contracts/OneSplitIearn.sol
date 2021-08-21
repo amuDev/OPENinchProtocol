@@ -82,7 +82,7 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
                         destToken,
                         amount
                              * (yTokens[i].calcPoolValueInToken())
-                            .div(yTokens[i].totalSupply()),
+                             / (yTokens[i].totalSupply()),
                         parts,
                         flags,
                         destTokenEthPriceTimesGasPrice
@@ -103,13 +103,13 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
                         flags,
                         _destTokenEthPriceTimesGasPrice
                              * (yTokens[i].calcPoolValueInToken())
-                            .div(yTokens[i].totalSupply())
+                             / (yTokens[i].totalSupply())
                     );
 
                     return(
                         returnAmount
                              * (yTokens[i].totalSupply())
-                            .div(yTokens[i].calcPoolValueInToken()),
+                             / (yTokens[i].calcPoolValueInToken()),
                         estimateGasAmount + 743_000,
                         distribution
                     );

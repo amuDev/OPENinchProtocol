@@ -58,7 +58,7 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
                 (returnAmount, estimateGasAmount, distribution) = _compoundGetExpectedReturn(
                     underlying,
                     destToken,
-                    amount * (compoundRate).div(1e18),
+                    amount * (compoundRate) / (1e18),
                     parts,
                     flags,
                     destTokenEthPriceTimesGasPrice
@@ -76,9 +76,9 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
                     amount,
                     parts,
                     flags,
-                    _destTokenEthPriceTimesGasPrice * (compoundRate).div(1e18)
+                    _destTokenEthPriceTimesGasPrice * (compoundRate) / (1e18)
                 );
-                return (returnAmount * (1e18).div(compoundRate), estimateGasAmount + 430_000, distribution);
+                return (returnAmount * (1e18) / (compoundRate), estimateGasAmount + 430_000, distribution);
             }
         }
 
