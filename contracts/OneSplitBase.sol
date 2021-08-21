@@ -490,7 +490,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     int256 value = args.matrix[i][args.distribution[i]];
                     returnAmount = returnAmount + (uint256(
                         int256(value == VERY_NEGATIVE_VALUE ? int256(0) : value) +
-                        int256(args.gases[i] * (args.destTokenEthPriceTimesGasPrice).div(1e18))
+                        int256(args.gases[i] * (args.destTokenEthPriceTimesGasPrice) / (1e18))
                     ));
                 }
                 else {
@@ -1042,7 +1042,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         if (amount == 0) {
             return 0;
         }
-        return amount * (toBalance) * (997).div(
+        return amount * (toBalance) * (997) / (
             fromBalance * (1000) + (amount * (997))
         );
     }
@@ -1116,7 +1116,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             (rets, gas) = _calculateUniswap(
                 midToken,
                 destToken,
-                _linearInterpolation(amount * (1e18).div(midTokenPrice), parts),
+                _linearInterpolation(amount * (1e18) / (midTokenPrice), parts),
                 flags
             );
             return (rets, gas + gas1);
@@ -1130,7 +1130,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             );
 
             for (uint i = 0; i < parts; i++) {
-                rets[i] = rets[i] * (midTokenPrice).div(1e18);
+                rets[i] = rets[i] * (midTokenPrice) / (1e18);
             }
             return (rets, gas + gas2);
         }
@@ -1372,7 +1372,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             if (i > 0 && rets[i - 1] == 0) {
                 break;
             }
-            rets[i] = amount * (i + 1).div(parts);
+            rets[i] = amount * (i + 1) / (parts);
 
             if (!UniversalERC20.isETH(fromToken)) {
                 if (fromHint.length == 0) {
@@ -1386,7 +1386,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     flags,
                     fromHint
                 );
-                rets[i] = rate * (rets[i]).div(fromTokenDecimals);
+                rets[i] = rate * (rets[i]) / (fromTokenDecimals);
             }
 
             if (!UniversalERC20.isETH(destToken) && rets[i] > 0) {
@@ -1401,7 +1401,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     10,
                     destHint
                 );
-                rets[i] = rate * (rets[i]) * (destTokenDecimals).div(1e36);
+                rets[i] = rate * (rets[i]) * (destTokenDecimals) / (1e36);
             }
         }
 
@@ -1500,8 +1500,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         }
 
         for (uint i = 0; i < amounts.length; i++) {
-            uint256 amount = amounts[i].sub(amounts[i] * (fee).div(1e18));
-            rets[i] = amount * (destBalance).div(
+            uint256 amount = amounts[i] - (amounts[i] * (fee) / (1e18));
+            rets[i] = amount * (destBalance) / (
                 fromBalance + (amount)
             );
         }
@@ -1872,7 +1872,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
                 continue;
             }
 
-            uint256 swapAmount = amount * (distribution[i]).div(parts);
+            uint256 swapAmount = amount * (distribution[i]) / (parts);
             if (i == lastNonZeroIndex) {
                 swapAmount = remainingAmount;
             }

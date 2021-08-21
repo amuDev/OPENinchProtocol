@@ -305,7 +305,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
             );
         }
         tokens.first().universalTransferFromSenderToThis(amount);
-        uint256 confirmed = tokens.first().universalBalanceOf(address(this)).sub(beforeBalances.ofFromToken);
+        uint256 confirmed = tokens.first().universalBalanceOf(address(this)) - (beforeBalances.ofFromToken);
 
         // Swap
         tokens.first().universalApprove(address(oneSplitImpl), confirmed);
@@ -320,7 +320,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         Balances memory afterBalances = _getFirstAndLastBalances(tokens, false);
 
         // Return
-        returnAmount = afterBalances.ofDestToken.sub(beforeBalances.ofDestToken);
+        returnAmount = afterBalances.ofDestToken - (beforeBalances.ofDestToken);
         require(returnAmount >= minReturn, "OneSplit: actual return amount is less than minReturn");
         tokens.last().universalTransfer(referral, returnAmount * (feePercent) / (1e18));
         tokens.last().universalTransfer(msg.sender, returnAmount - (returnAmount * (feePercent) / (1e18)));
@@ -339,7 +339,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
 
         // Return remainder
         if (afterBalances.ofFromToken > beforeBalances.ofFromToken) {
-            tokens.first().universalTransfer(msg.sender, afterBalances.ofFromToken.sub(beforeBalances.ofFromToken));
+            tokens.first().universalTransfer(msg.sender, afterBalances.ofFromToken - (beforeBalances.ofFromToken));
         }
 
         if ((flags[0] & (FLAG_ENABLE_CHI_BURN | FLAG_ENABLE_CHI_BURN_BY_ORIGIN)) > 0) {
@@ -382,7 +382,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
 
     function _getFirstAndLastBalances(IERC20[] memory tokens, bool subValue) internal view returns(Balances memory) {
         return Balances({
-            ofFromToken: tokens.first().universalBalanceOf(address(this)).sub(subValue ? msg.value : 0),
+            ofFromToken: tokens.first().universalBalanceOf(address(this)) - (subValue ? msg.value : 0),
             ofDestToken: tokens.last().universalBalanceOf(address(this))
         });
     }

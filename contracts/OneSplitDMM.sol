@@ -95,7 +95,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
                 (returnAmount, estimateGasAmount, distribution) = _dmmGetExpectedReturn(
                     underlying,
                     destToken,
-                    amount * (_getDMMExchangeRate(IDMM(address(_fromToken)))).div(1e18),
+                    amount * (_getDMMExchangeRate(IDMM(address(_fromToken)))) / (1e18),
                     parts,
                     flags,
                     destTokenEthPriceTimesGasPrice
@@ -115,10 +115,10 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
                     amount,
                     parts,
                     flags,
-                    destTokenEthPriceTimesGasPrice * (price).div(1e18)
+                    destTokenEthPriceTimesGasPrice * (price) / (1e18)
                 );
                 return (
-                    returnAmount * (1e18).div(price),
+                    returnAmount * (1e18) / (price),
                     estimateGasAmount + 430_000,
                     distribution
                 );

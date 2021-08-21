@@ -145,7 +145,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
 
             uint256 exchangeAmount = amount
                  * (details.tokens[i].reserve)
-                .div(details.totalSupply);
+                 / (details.totalSupply);
 
             if (toToken.eq(details.tokens[i].token)) {
                 returnAmount = returnAmount + (exchangeAmount);
@@ -190,8 +190,8 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
 
         // will overwritten to liquidity amounts
         uint256[2] memory amounts;
-        amounts[0] = amount.div(2);
-        amounts[1] = amount.sub(amounts[0]);
+        amounts[0] = amount / (2);
+        amounts[1] = amount - (amounts[0]);
         uint256[] memory dist = new uint256[](distribution.length);
         for (uint i = 0; i < 2; i++) {
 
@@ -217,7 +217,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
         for (uint i = 0; i < 2; i++) {
             returnAmount = Math.min(
                 returnAmount,
-                details.totalSupply * (amounts[i]).div(details.tokens[i].reserve)
+                details.totalSupply * (amounts[i]) / (details.tokens[i].reserve)
             );
         }
 
@@ -271,7 +271,7 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
                 return _swapToMooniswapToken(
                     ETH_ADDRESS,
                     toToken,
-                    ethBalanceAfter.sub(ethBalanceBefore),
+                    ethBalanceAfter - (ethBalanceBefore),
                     dist,
                     FLAG_DISABLE_MOONISWAP_POOL_TOKEN
                 );
@@ -359,8 +359,8 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
 
         // will overwritten to liquidity amounts
         uint256[] memory amounts = new uint256[](2);
-        amounts[0] = amount.div(2);
-        amounts[1] = amount.sub(amounts[0]);
+        amounts[0] = amount / (2);
+        amounts[1] = amount - (amounts[0]);
         uint256[] memory dist = new uint256[](distribution.length);
         for (uint i = 0; i < 2; i++) {
 
