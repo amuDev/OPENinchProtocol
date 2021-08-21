@@ -41,7 +41,7 @@ contract OneSplitViewWrap is
         uint256 amount,
         uint256 parts,
         uint256 flags
-    ) override
+    ) virtual override
         public
         view
         returns(
@@ -66,7 +66,7 @@ contract OneSplitViewWrap is
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
         uint256 destTokenEthPriceTimesGasPrice
-    ) override(OneSplitAaveView, 
+    ) virtual override(OneSplitAaveView, 
                OneSplitBdaiView, 
                OneSplitChaiView, 
                OneSplitCompoundView, 
@@ -153,6 +153,9 @@ contract OneSplitWrap is
     fallback() external payable {
         // solium-disable-next-line security/no-tx-origin
         require(msg.sender != tx.origin);
+    }
+    receive() external payable { //TODO: what is this meant to be (added to solve warning)
+
     }
 
     function getExpectedReturn(

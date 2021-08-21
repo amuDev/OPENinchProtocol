@@ -24,6 +24,7 @@ library UniversalERC20 {
             token.safeTransfer(to, amount);
             return true;
         }
+        return false; // it seems like the response value is never used
     }
 
     function universalTransferFrom(IERC20 token, address from, address to, uint256 amount) internal {

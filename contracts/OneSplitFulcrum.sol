@@ -57,7 +57,7 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    ) override
+    ) virtual override
         public
         view
         returns(
