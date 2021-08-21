@@ -487,13 +487,13 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         for (uint i = 0; i < DEXES_COUNT; i++) {
             if (args.distribution[i] > 0) {
-                if (args.distribution[i] == args.parts || exact[i] || (args.flags & FLAG_DISABLE_SPLIT_RECALCULATION) != 0){
-                    estimateGasAmount = estimateGasAmount + args.gases[i];
+                if (args.distribution[i] == args.parts || exact[i] || DisableFlags.check(args.flags,FLAG_DISABLE_SPLIT_RECALCULATION)) {
+                    estimateGasAmount = estimateGasAmount.add(args.gases[i]);
                     int256 value = args.matrix[i][args.distribution[i]];
-                    returnAmount = returnAmount + uint256(
-                        uint256(value == VERY_NEGATIVE_VALUE ? int256(0) : value) +
-                        uint256(args.gases[i] * args.destTokenEthPriceTimesGasPrice / 1e18)
-                    );
+                    returnAmount = returnAmount.add(uint256(
+                        int256(value == VERY_NEGATIVE_VALUE ? int256(0) : value) +
+                        int256(args.gases[i].mul(args.destTokenEthPriceTimesGasPrice).div(1e18))
+                    ));
                 }
                 else {
                     (uint256[] memory rets, uint256 gas) = args.reserves[i](args.fromToken, args.destToken, args.amount * args.distribution[i] / args.parts, 1, args.flags);
