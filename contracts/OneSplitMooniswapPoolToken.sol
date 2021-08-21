@@ -56,7 +56,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
         }
 
 
-        if (!DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
+        if (!flags.check(FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
             bool isPoolTokenFrom = mooniswapRegistry.isPool(address(fromToken));
             bool isPoolTokenTo = mooniswapRegistry.isPool(address(toToken));
 
@@ -242,7 +242,7 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
             return;
         }
 
-        if (!DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
+        if (!flags.check(FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
             bool isPoolTokenFrom = mooniswapRegistry.isPool(address(fromToken));
             bool isPoolTokenTo = mooniswapRegistry.isPool(address(toToken));
 

@@ -25,7 +25,7 @@ abstract contract OneSplitMStableView is OneSplitViewWrapBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_MSTABLE_MUSD)) {
+        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_MSTABLE_MUSD)) {
             if (fromToken == IERC20(musd)) {
                 {
                     (bool valid1,, uint256 res1,) = musd_helper.getRedeemValidity(musd, amount, destToken);
@@ -110,7 +110,7 @@ abstract contract OneSplitMStable is OneSplitBaseWrap {
             return;
         }
 
-        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_MSTABLE_MUSD)) {
+        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_MSTABLE_MUSD)) {
             if (fromToken == IERC20(musd)) {
                 if (destToken == usdc || destToken == dai || destToken == usdt || destToken == tusd) {
                     (,,, uint256 result) = musd_helper.getRedeemValidity(fromToken, amount, destToken);
