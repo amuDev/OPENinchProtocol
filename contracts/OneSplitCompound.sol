@@ -5,6 +5,9 @@ import "./OneSplitBase.sol";
 
 
 abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -95,6 +98,10 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
 
 
 abstract contract OneSplitCompound is OneSplitBaseWrap {
+    using DisableFlags for uint256;
+
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
@@ -150,7 +157,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
                 uint256 underlyingAmount = underlying.universalBalanceOf(address(this));
 
                 if (underlying.isETH()) {
-                    cETH.mint.value(underlyingAmount)();
+                    cETH.mint{value: underlyingAmount}(); //TODO: this cant be right
                 } else {
                     underlying.universalApprove(address(destToken), underlyingAmount);
                     ICompoundToken(address(destToken)).mint(underlyingAmount);

@@ -12,6 +12,8 @@ contract OneSplitBdaiBase {
 
 
 abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -71,6 +73,8 @@ abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
 
 
 abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
+    using DisableFlags for uint256;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
