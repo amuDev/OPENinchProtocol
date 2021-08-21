@@ -12,6 +12,8 @@ contract OneSplitBdaiBase {
 
 
 abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -71,6 +73,9 @@ abstract contract OneSplitBdaiView is OneSplitViewWrapBase, OneSplitBdaiBase {
 
 
 abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
+    using DisableFlags for uint256;
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
@@ -88,7 +93,7 @@ abstract contract OneSplitBdai is OneSplitBaseWrap, OneSplitBdaiBase {
 
                 uint256 btuBalance = btu.balanceOf(address(this));
                 if (btuBalance > 0) {
-                    (,uint256[] memory btuDistribution) = super.getExpectedReturn(
+                    (,uint256[] memory btuDistribution) = this.getExpectedReturn(
                         btu,
                         destToken,
                         btuBalance,

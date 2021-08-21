@@ -8,15 +8,15 @@ contract OneSplitFulcrumBase {
     using UniversalERC20 for IERC20;
 
     function _isFulcrumToken(IERC20 token) internal view returns(IERC20) {
-        if (UniversalERC20.isETH(token)) {
-            return IERC20(-1);
+        if (token.isETH()) {
+            return IERC20(address(0));
         }
 
-        (bool success, bytes memory data) = address(token).staticcall.gas(5000)(abi.encodeWithSignature(
+        (bool success, bytes memory data) = address(token).staticcall{gas: 5000}(abi.encodeWithSignature(
             "name()"
         ));
         if (!success) {
-            return IERC20(-1);
+            return IERC20(address(0));
         }
 
         bool foundBZX = false;
@@ -34,14 +34,14 @@ contract OneSplitFulcrumBase {
             }
         }
         if (!foundBZX) {
-            return IERC20(-1);
+            return IERC20(address(0));
         }
 
-        (success, data) = address(token).staticcall.gas(5000)(abi.encodeWithSelector(
+        (success, data) = address(token).staticcall{gas: 5000}(abi.encodeWithSelector(
             IFulcrumToken(address(token)).loanTokenAddress.selector
         ));
         if (!success) {
-            return IERC20(-1);
+            return IERC20(address(0));
         }
 
         return abi.decode(data, (IERC20));
@@ -50,6 +50,9 @@ contract OneSplitFulcrumBase {
 
 
 abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBase {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -98,7 +101,7 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
 
         if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_FULCRUM)) {
             IERC20 underlying = _isFulcrumToken(fromToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 uint256 fulcrumRate = IFulcrumToken(address(fromToken)).tokenPrice();
                 (returnAmount, estimateGasAmount, distribution) = _fulcrumGetExpectedReturn(
                     underlying,
@@ -112,7 +115,7 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
             }
 
             underlying = _isFulcrumToken(destToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 uint256 _destTokenEthPriceTimesGasPrice = destTokenEthPriceTimesGasPrice;
                 uint256 fulcrumRate = IFulcrumToken(address(destToken)).tokenPrice();
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
@@ -140,6 +143,9 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
 
 
 abstract contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
+    using DisableFlags for uint256;
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
@@ -169,7 +175,7 @@ abstract contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
 
         if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_FULCRUM)) {
             IERC20 underlying = _isFulcrumToken(fromToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 if (underlying.isETH()) {
                     IFulcrumToken(address(fromToken)).burnToEther(address(this), amount);
                 } else {
@@ -188,7 +194,7 @@ abstract contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
             }
 
             underlying = _isFulcrumToken(destToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 super._swap(
                     fromToken,
                     underlying,
@@ -200,7 +206,7 @@ abstract contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
                 uint256 underlyingAmount = underlying.universalBalanceOf(address(this));
 
                 if (underlying.isETH()) {
-                    IFulcrumToken(address(destToken)).mintWithEther.value(underlyingAmount)(address(this));
+                    IFulcrumToken(address(destToken)).mintWithEther{value: underlyingAmount}(address(this));
                 } else {
                     underlying.universalApprove(address(destToken), underlyingAmount);
                     IFulcrumToken(address(destToken)).mint(address(this), underlyingAmount);
