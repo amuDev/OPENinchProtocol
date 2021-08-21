@@ -264,7 +264,7 @@ contract OneSplitWrap is
         uint256 minReturn,
         uint256[] memory distribution,
         uint256 flags
-    ) public payable returns(uint256 returnAmount) {
+    ) override public payable returns(uint256 returnAmount) {
         fromToken.universalTransferFrom(msg.sender, address(this), amount);
         uint256 confirmed = fromToken.universalBalanceOf(address(this));
         _swap(fromToken, destToken, confirmed, distribution, flags);
