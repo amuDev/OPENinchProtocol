@@ -269,13 +269,13 @@ contract OneSplitWrap is
         uint256 flags
     ) public payable returns(uint256 returnAmount) {
         fromToken.universalTransferFrom(msg.sender, address(this), amount);
-        uint256 confirmed = UniversalERC20.universalBalanceOf(fromToken,address(this));
+        uint256 confirmed = fromToken.universalBalanceOf(address(this));
         _swap(fromToken, destToken, confirmed, distribution, flags);
 
-        returnAmount = UniversalERC20.universalBalanceOf(destToken,address(this));
+        returnAmount = destToken.universalBalanceOf(address(this));
         require(returnAmount >= minReturn, "OneSplit: actual return amount is less than minReturn");
         destToken.universalTransfer(msg.sender, returnAmount);
-        fromToken.universalTransfer(msg.sender, UniversalERC20.universalBalanceOf(fromToken,address(this)));
+        fromToken.universalTransfer(msg.sender, fromToken.universalBalanceOf(address(this)));
     }
 
     function swapMulti(

@@ -23,7 +23,7 @@ contract AaveRegistry is Ownable, IAaveRegistry {
     }
 
     function aTokenByToken(IERC20 token) external view override returns(IAaveToken) {
-        if (UniversalERC20.isETH(token)) {
+        if (token.isETH()) {
             return aETH;
         }
         return IAaveToken(_aTokenByToken[address(token)]);
