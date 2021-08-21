@@ -27,7 +27,7 @@ import "./interface/IShell.sol";
 import "./interface/IMStable.sol";
 import "./interface/IBalancerRegistry.sol";
 import "./IOneSplit.sol";
-import "./UniversalIERC20.sol";
+import "./UniversalERC20.sol";
 import "./BalancerLib.sol";
 
 
@@ -75,8 +75,8 @@ library DisableFlags {
 abstract contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
     using DisableFlags for uint256;
 
-    using UniversalIERC20 for IERC20;
-    using UniversalIERC20 for IWETH;
+    using UniversalERC20 for IERC20;
+    using UniversalERC20 for IWETH;
     using UniswapV2ExchangeLib for IUniswapV2Exchange;
     using ChaiHelper for IChai;
 
@@ -194,12 +194,12 @@ abstract contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
         IERC20 fromToken,
         IERC20 destToken
     ) internal view returns(bytes32) {
-        if (!UniversalIERC20.isETH(fromToken) && !UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(fromToken) && !UniversalERC20.isETH(destToken)) {
             return 0;
         }
 
         bytes32[] memory reserveIds = kyberStorage.getReserveIdsPerTokenSrc(
-            UniversalIERC20.isETH(fromToken) ? destToken : fromToken
+            UniversalERC20.isETH(fromToken) ? destToken : fromToken
         );
 
         for (uint i = 0; i < reserveIds.length; i++) {
@@ -573,8 +573,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 poolIndex
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         address[] memory pools = balancerRegistry.getBestPoolsWithLimit(
-            address(UniversalIERC20.isETH(fromToken) ? weth : fromToken),
-            address(UniversalIERC20.isETH(destToken) ? weth : destToken),
+            address(UniversalERC20.isETH(fromToken) ? weth : fromToken),
+            address(UniversalERC20.isETH(destToken) ? weth : destToken),
             poolIndex + 1
         );
         if (poolIndex >= pools.length) {
@@ -583,11 +583,11 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         rets = balancerHelper.getReturns(
             IBalancerPool(pools[poolIndex]),
-            UniversalIERC20.isETH(fromToken) ? weth : fromToken,
-            UniversalIERC20.isETH(destToken) ? weth : destToken,
+            UniversalERC20.isETH(fromToken) ? weth : fromToken,
+            UniversalERC20.isETH(destToken) ? weth : destToken,
             _linearInterpolation(amount, parts)
         );
-        gas = 75_000 + (UniversalIERC20.isETH(fromToken) || UniversalIERC20.isETH(destToken) ? 0 : 65_000);
+        gas = 75_000 + (UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken) ? 0 : 65_000);
     }
 
     function calculateBalancer1(
@@ -1055,7 +1055,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         rets = amounts;
 
-        if (!UniversalIERC20.isETH(fromToken)) {
+        if (!UniversalERC20.isETH(fromToken)) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
             if (fromExchange == IUniswapExchange(0)) {
                 return (new uint256[](rets.length), 0);
@@ -1069,7 +1069,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             }
         }
 
-        if (!UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(destToken)) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
             if (toExchange == IUniswapExchange(0)) {
                 return (new uint256[](rets.length), 0);
@@ -1083,7 +1083,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             }
         }
 
-        return (rets, UniversalIERC20.isETH(fromToken) || UniversalIERC20.isETH(destToken) ? 60_000 : 100_000);
+        return (rets, UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken) ? 60_000 : 100_000);
     }
 
     function calculateUniswap(
@@ -1112,7 +1112,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 gas1,
         uint256 gas2
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (!UniversalIERC20.isETH(fromToken) && UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(fromToken) && UniversalERC20.isETH(destToken)) {
             (rets, gas) = _calculateUniswap(
                 midToken,
                 destToken,
@@ -1121,7 +1121,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             );
             return (rets, gas + gas1);
         }
-        else if (UniversalIERC20.isETH(fromToken) && !UniversalIERC20.isETH(destToken)) {
+        else if (UniversalERC20.isETH(fromToken) && !UniversalERC20.isETH(destToken)) {
             (rets, gas) = _calculateUniswap(
                 fromToken,
                 midToken,
@@ -1146,14 +1146,14 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         IERC20 midPreToken;
-        if (!UniversalIERC20.isETH(fromToken) && UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(fromToken) && UniversalERC20.isETH(destToken)) {
             midPreToken = fromToken;
         }
-        else if (!UniversalIERC20.isETH(destToken) && UniversalIERC20.isETH(fromToken)) {
+        else if (!UniversalERC20.isETH(destToken) && UniversalERC20.isETH(fromToken)) {
             midPreToken = destToken;
         }
 
-        if (!UniversalIERC20.isETH(token)) {
+        if (!UniversalERC20.isETH(token)) {
             ICompoundToken midToken = compoundRegistry.cTokenByToken(midPreToken);
             if (midToken != ICompoundToken(0)) {
                 return _calculateUniswapWrapped(
@@ -1180,8 +1180,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (fromToken == dai && UniversalIERC20.isETH(destToken) ||
-            UniversalIERC20.isETH(fromToken) && destToken == dai)
+        if (fromToken == dai && UniversalERC20.isETH(destToken) ||
+            UniversalERC20.isETH(fromToken) && destToken == dai)
         {
             return _calculateUniswapWrapped(
                 fromToken,
@@ -1207,15 +1207,15 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         IERC20 midPreToken;
-        if (!UniversalIERC20.isETH(fromToken) && UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(fromToken) && UniversalERC20.isETH(destToken)) {
             midPreToken = fromToken;
         }
-        else if (!UniversalIERC20.isETH(destToken) && UniversalIERC20.isETH(fromToken)) {
+        else if (!UniversalERC20.isETH(destToken) && UniversalERC20.isETH(fromToken)) {
             midPreToken = destToken;
         }
 
-        if (!UniversalIERC20.isETH(token)) {
-        if (!UniversalIERC20.isETH(token)) {
+        if (!UniversalERC20.isETH(token)) {
+        if (!UniversalERC20.isETH(token)) {
             IAaveToken midToken = aaveRegistry.aTokenByToken(midPreToken);
             if (midToken != IAaveToken(0)) {
                 return _calculateUniswapWrapped(
@@ -1375,7 +1375,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             }
             rets[i] = amount.mul(i + 1).div(parts);
 
-            if (!UniversalIERC20.isETH(fromToken)) {
+            if (!UniversalERC20.isETH(fromToken)) {
                 if (fromHint.length == 0) {
                     rets[i] = 0;
                     break;
@@ -1390,7 +1390,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                 rets[i] = rate.mul(rets[i]).div(fromTokenDecimals);
             }
 
-            if (!UniversalIERC20.isETH(destToken) && rets[i] > 0) {
+            if (!UniversalERC20.isETH(destToken) && rets[i] > 0) {
                 if (destHint.length == 0) {
                     rets[i] = 0;
                     break;
@@ -1420,8 +1420,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         // IBancorNetwork bancorNetwork = IBancorNetwork(bancorContractRegistry.addressOf("BancorNetwork"));
 
         // address[] memory path = bancorFinder.buildBancorPath(
-        //     UniversalIERC20.isETH(fromToken) ? bancorEtherToken : fromToken,
-        //     UniversalIERC20.isETH(destToken) ? bancorEtherToken : destToken
+        //     UniversalERC20.isETH(fromToken) ? bancorEtherToken : fromToken,
+        //     UniversalERC20.isETH(destToken) ? bancorEtherToken : destToken
         // );
 
         // rets = _linearInterpolation(amount, parts);
@@ -1459,8 +1459,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             (bool success, bytes memory data) = address(oasisExchange).staticcall.gas(500000)(
                 abi.encodeWithSelector(
                     oasisExchange.getBuyAmount.selector,
-                    UniversalIERC20.isETH(destToken) ? weth : destToken,
-                    UniversalIERC20.isETH(fromToken) ? weth : fromToken,
+                    UniversalERC20.isETH(destToken) ? weth : destToken,
+                    UniversalERC20.isETH(fromToken) ? weth : fromToken,
                     rets[i]
                 )
             );
@@ -1486,16 +1486,16 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         rets = new uint256[](amounts.length);
 
         IMooniswap mooniswap = mooniswapRegistry.pools(
-            UniversalIERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
-            UniversalIERC20.isETH(destToken) ? ZERO_ADDRESS : destToken
+            UniversalERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
+            UniversalERC20.isETH(destToken) ? ZERO_ADDRESS : destToken
         );
         if (mooniswap == IMooniswap(0)) {
             return (rets, 0);
         }
 
         uint256 fee = mooniswap.fee();
-        uint256 fromBalance = mooniswap.getBalanceForAddition(UniversalIERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken);
-        uint256 destBalance = mooniswap.getBalanceForRemoval(UniversalIERC20.isETH(destToken) ? ZERO_ADDRESS : destToken);
+        uint256 fromBalance = mooniswap.getBalanceForAddition(UniversalERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken);
+        uint256 destBalance = mooniswap.getBalanceForRemoval(UniversalERC20.isETH(destToken) ? ZERO_ADDRESS : destToken);
         if (fromBalance == 0 || destBalance == 0) {
             return (rets, 0);
         }
@@ -1507,7 +1507,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             );
         }
 
-        return (rets, (UniversalIERC20.isETH(fromToken) || UniversalIERC20.isETH(destToken)) ? 80_000 : 110_000);
+        return (rets, (UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken)) ? 80_000 : 110_000);
     }
 
     function calculateMooniswap(
@@ -1531,7 +1531,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (UniversalIERC20.isETH(fromToken) || UniversalIERC20.isETH(destToken)) {
+        if (UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken)) {
             return (new uint256[](parts), 0);
         }
 
@@ -1594,7 +1594,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (UniversalIERC20.isETH(fromToken) || fromToken == weth || UniversalIERC20.isETH(destToken) || destToken == weth) {
+        if (UniversalERC20.isETH(fromToken) || fromToken == weth || UniversalERC20.isETH(destToken) || destToken == weth) {
             return (new uint256[](parts), 0);
         }
 
@@ -1658,8 +1658,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         rets = new uint256[](amounts.length);
 
-        IERC20 fromTokenReal = UniversalIERC20.isETH(fromToken) ? weth : fromToken;
-        IERC20 destTokenReal = UniversalIERC20.isETH(destToken) ? weth : destToken;
+        IERC20 fromTokenReal = UniversalERC20.isETH(fromToken) ? weth : fromToken;
+        IERC20 destTokenReal = UniversalERC20.isETH(destToken) ? weth : destToken;
         IUniswapV2Exchange exchange = uniswapV2.getPair(fromTokenReal, destTokenReal);
         if (exchange != IUniswapV2Exchange(0)) {
             uint256 fromTokenBalance = fromTokenReal.universalBalanceOf(address(exchange));
@@ -1855,7 +1855,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         }
 
         if (parts == 0) {
-            if (UniversalIERC20.isETH(fromToken)) {
+            if (UniversalERC20.isETH(fromToken)) {
                 msg.sender.transfer(msg.value);
                 return msg.value;
             }
@@ -2117,7 +2117,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
     ) internal {
         uint256 returnAmount = amount;
 
-        if (!UniversalIERC20.isETH(fromToken)) {
+        if (!UniversalERC20.isETH(fromToken)) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
             if (fromExchange != IUniswapExchange(0)) {
                 fromToken.universalApprove(address(fromExchange), returnAmount);
@@ -2125,7 +2125,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
             }
         }
 
-        if (!UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(destToken)) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
             if (toExchange != IUniswapExchange(0)) {
                 returnAmount = toExchange.ethToTokenSwapInput.value(returnAmount)(1, now);
@@ -2139,7 +2139,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 amount,
         uint256 flags
     ) internal {
-        if (!UniversalIERC20.isETH(fromToken)) {
+        if (!UniversalERC20.isETH(fromToken)) {
             ICompoundToken fromCompound = compoundRegistry.cTokenByToken(fromToken);
             fromToken.universalApprove(address(fromCompound), amount);
             fromCompound.mint(amount);
@@ -2147,7 +2147,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
             return;
         }
 
-        if (!UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(destToken)) {
             ICompoundToken toCompound = compoundRegistry.cTokenByToken(destToken);
             _swapOnUniswap(fromToken, IERC20(toCompound), amount, flags);
             toCompound.redeem(IERC20(toCompound).universalBalanceOf(address(this)));
@@ -2182,7 +2182,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 amount,
         uint256 flags
     ) internal {
-        if (!UniversalIERC20.isETH(fromToken)) {
+        if (!UniversalERC20.isETH(fromToken)) {
             IAaveToken fromAave = aaveRegistry.aTokenByToken(fromToken);
             fromToken.universalApprove(aave.core(), amount);
             aave.deposit(fromToken, amount, 1101);
@@ -2190,7 +2190,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
             return;
         }
 
-        if (!UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(destToken)) {
             IAaveToken toAave = aaveRegistry.aTokenByToken(destToken);
             _swapOnUniswap(fromToken, IERC20(toAave), amount, flags);
             toAave.redeem(toAave.balanceOf(address(this)));
@@ -2205,13 +2205,13 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 /*flags*/
     ) internal {
         IMooniswap mooniswap = mooniswapRegistry.pools(
-            UniversalIERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
-            UniversalIERC20.isETH(destToken) ? ZERO_ADDRESS : destToken
+            UniversalERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
+            UniversalERC20.isETH(destToken) ? ZERO_ADDRESS : destToken
         );
         fromToken.universalApprove(address(mooniswap), amount);
-        mooniswap.swap.value(UniversalIERC20.isETH(fromToken) ? amount : 0)(
-            UniversalIERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
-            UniversalIERC20.isETH(destToken) ? ZERO_ADDRESS : destToken,
+        mooniswap.swap.value(UniversalERC20.isETH(fromToken) ? amount : 0)(
+            UniversalERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
+            UniversalERC20.isETH(destToken) ? ZERO_ADDRESS : destToken,
             amount,
             0,
             0x68a17B587CAF4f9329f0e372e3A78D23A46De6b5
@@ -2329,7 +2329,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         bytes32[] memory reserveIds = new bytes32[](1);
         reserveIds[0] = reserveId;
 
-        if (!UniversalIERC20.isETH(fromToken)) {
+        if (!UniversalERC20.isETH(fromToken)) {
             bytes memory fromHint = kyberHintHandler.buildTokenToEthHint(
                 fromToken,
                 IKyberHintHandler.TradeType.MaskIn,
@@ -2351,7 +2351,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
             );
         }
 
-        if (!UniversalIERC20.isETH(destToken)) {
+        if (!UniversalERC20.isETH(destToken)) {
             bytes memory destHint = kyberHintHandler.buildEthToTokenHint(
                 destToken,
                 IKyberHintHandler.TradeType.MaskIn,
@@ -2381,11 +2381,11 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
     ) internal {
         IBancorNetwork bancorNetwork = IBancorNetwork(bancorContractRegistry.addressOf("BancorNetwork"));
         address[] memory path = bancorNetworkPathFinder.generatePath(
-            UniversalIERC20.isETH(fromToken) ? bancorEtherToken : fromToken,
-            UniversalIERC20.isETH(destToken) ? bancorEtherToken : destToken
+            UniversalERC20.isETH(fromToken) ? bancorEtherToken : fromToken,
+            UniversalERC20.isETH(destToken) ? bancorEtherToken : destToken
         );
         fromToken.universalApprove(address(bancorNetwork), amount);
-        bancorNetwork.convert.value(UniversalIERC20.isETH(fromToken) ? amount : 0)(path, amount, 1);
+        bancorNetwork.convert.value(UniversalERC20.isETH(fromToken) ? amount : 0)(path, amount, 1);
     }
 
     function _swapOnOasis(
@@ -2394,20 +2394,20 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        if (UniversalIERC20.isETH(fromToken)) {
+        if (UniversalERC20.isETH(fromToken)) {
             weth.deposit.value(amount)();
         }
 
-        IERC20 approveToken = UniversalIERC20.isETH(fromToken) ? weth : fromToken;
+        IERC20 approveToken = UniversalERC20.isETH(fromToken) ? weth : fromToken;
         approveToken.universalApprove(address(oasisExchange), amount);
         oasisExchange.sellAllAmount(
-            UniversalIERC20.isETH(fromToken) ? weth : fromToken,
+            UniversalERC20.isETH(fromToken) ? weth : fromToken,
             amount,
-            UniversalIERC20.isETH(destToken) ? weth : destToken,
+            UniversalERC20.isETH(destToken) ? weth : destToken,
             1
         );
 
-        if (UniversalIERC20.isETH(destToken)) {
+        if (UniversalERC20.isETH(destToken)) {
             weth.withdraw(weth.balanceOf(address(this)));
         }
     }
@@ -2418,12 +2418,12 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 amount,
         uint256 /*flags*/
     ) internal returns(uint256 returnAmount) {
-        if (UniversalIERC20.isETH(fromToken)) {
+        if (UniversalERC20.isETH(fromToken)) {
             weth.deposit.value(amount)();
         }
 
-        IERC20 fromTokenReal = UniversalIERC20.isETH(fromToken) ? weth : fromToken;
-        IERC20 toTokenReal = UniversalIERC20.isETH(destToken) ? weth : destToken;
+        IERC20 fromTokenReal = UniversalERC20.isETH(fromToken) ? weth : fromToken;
+        IERC20 toTokenReal = UniversalERC20.isETH(destToken) ? weth : destToken;
         IUniswapV2Exchange exchange = uniswapV2.getPair(fromTokenReal, toTokenReal);
         bool needSync;
         bool needSkim;
@@ -2442,7 +2442,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
             exchange.swap(returnAmount, 0, address(this), "");
         }
 
-        if (UniversalIERC20.isETH(destToken)) {
+        if (UniversalERC20.isETH(destToken)) {
             weth.withdraw(weth.balanceOf(address(this)));
         }
     }
@@ -2534,25 +2534,25 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 poolIndex
     ) internal {
         address[] memory pools = balancerRegistry.getBestPoolsWithLimit(
-            address(UniversalIERC20.isETH(fromToken) ? weth : fromToken),
-            address(UniversalIERC20.isETH(destToken) ? weth : destToken),
+            address(UniversalERC20.isETH(fromToken) ? weth : fromToken),
+            address(UniversalERC20.isETH(destToken) ? weth : destToken),
             poolIndex + 1
         );
 
-        if (UniversalIERC20.isETH(fromToken)) {
+        if (UniversalERC20.isETH(fromToken)) {
             weth.deposit.value(amount)();
         }
 
-        (UniversalIERC20.isETH(fromToken) ? weth : fromToken).universalApprove(pools[poolIndex], amount);
+        (UniversalERC20.isETH(fromToken) ? weth : fromToken).universalApprove(pools[poolIndex], amount);
         IBalancerPool(pools[poolIndex]).swapExactAmountIn(
-            UniversalIERC20.isETH(fromToken) ? weth : fromToken,
+            UniversalERC20.isETH(fromToken) ? weth : fromToken,
             amount,
-            UniversalIERC20.isETH(destToken) ? weth : destToken,
+            UniversalERC20.isETH(destToken) ? weth : destToken,
             0,
             uint256(-1)
         );
 
-        if (UniversalIERC20.isETH(destToken)) {
+        if (UniversalERC20.isETH(destToken)) {
             weth.withdraw(weth.balanceOf(address(this)));
         }
     }

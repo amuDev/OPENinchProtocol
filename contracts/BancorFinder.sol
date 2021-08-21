@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface/IBancorContractRegistry.sol";
 import "./interface/IBancorConverterRegistry.sol";
-import "./UniversalIERC20.sol";
+import "./UniversalERC20.sol";
 
 
 contract BancorFinder {
-    using UniversalIERC20 for IERC20;
+    using UniversalERC20 for IERC20;
 
     IERC20 constant internal ETH_ADDRESS = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
     IERC20 constant internal bnt = IERC20(0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C);
@@ -25,10 +25,10 @@ contract BancorFinder {
             return new address[](0);
         }
 
-        if (UniversalIERC20.isETH(fromToken)) {
+        if (UniversalERC20.isETH(fromToken)) {
             fromToken = ETH_ADDRESS;
         }
-        if (UniversalIERC20.isETH(destToken)) {
+        if (UniversalERC20.isETH(destToken)) {
             destToken = ETH_ADDRESS;
         }
 
@@ -48,7 +48,7 @@ contract BancorFinder {
         if (fromToken != bnt) {
             (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
-                UniversalIERC20.isETH(fromToken) ? ETH_ADDRESS : fromToken,
+                UniversalERC20.isETH(fromToken) ? ETH_ADDRESS : fromToken,
                 0
             ));
             if (!success) {
@@ -64,7 +64,7 @@ contract BancorFinder {
         if (destToken != bnt) {
             (bool success, bytes memory data) = address(bancorConverterRegistry).staticcall{gas:100000}(abi.encodeWithSelector(
                 bancorConverterRegistry.getConvertibleTokenSmartToken.selector,
-                UniversalIERC20.isETH(destToken) ? ETH_ADDRESS : destToken,
+                UniversalERC20.isETH(destToken) ? ETH_ADDRESS : destToken,
                 0
             ));
             if (!success) {

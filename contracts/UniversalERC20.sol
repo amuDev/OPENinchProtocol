@@ -4,8 +4,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/IERC20/utils/SafeIERC20.sol";
 
-/// @dev How do we use UniversalIERC20.isETH(fromToken) instead of UniversalIERC20.istETH(fromToken)
-library UniversalIERC20 {
+/// @dev How do we use UniversalERC20.isETH(fromToken) instead of UniversalERC20.istETH(fromToken)
+library UniversalERC20 {
 
     using SafeMath for uint256;
     using SafeIERC20 for IERC20;

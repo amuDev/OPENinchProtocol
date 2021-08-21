@@ -3,12 +3,12 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./OneSplitBase.sol";
 import "./interface/IMooniswap.sol";
-import "./UniversalIERC20.sol";
+import "./UniversalERC20.sol";
 
 contract OneSplitMooniswapTokenBase {
     using SafeMath for uint256;
     using Math for uint256;
-    using UniversalIERC20 for IERC20;
+    using UniversalERC20 for IERC20;
 
     struct TokenInfo {
         IERC20 token;

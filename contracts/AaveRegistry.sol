@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface/IAaveRegistry.sol";
-import "./UniversalIERC20.sol";
+import "./UniversalERC20.sol";
 
 
 contract AaveRegistry is Ownable, IAaveRegistry {
-    using UniversalIERC20 for IERC20;
+    using UniversalERC20 for IERC20;
 
     IAaveToken internal constant aETH = IAaveToken(0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04);
     IERC20 internal constant ETH = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
@@ -23,7 +23,7 @@ contract AaveRegistry is Ownable, IAaveRegistry {
     }
 
     function aTokenByToken(IERC20 token) external view override returns(IAaveToken) {
-        if (UniversalIERC20.isETH(token)) {
+        if (UniversalERC20.isETH(token)) {
             return aETH;
         }
         return IAaveToken(_aTokenByToken[address(token)]);

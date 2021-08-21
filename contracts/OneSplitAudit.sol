@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interface/IWETH.sol";
 import "./interface/IUniswapV2Exchange.sol";
 import "./IOneSplit.sol";
-import "./UniversalIERC20.sol";
+import "./UniversalERC20.sol";
 
 
 abstract contract IFreeFromUpTo is IERC20 {
@@ -44,7 +44,7 @@ library Array {
 //
 contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     using SafeMath for uint256;
-    using UniversalIERC20 for IERC20;
+    using UniversalERC20 for IERC20;
     using Array for IERC20[];
 
     IWETH constant internal weth = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);

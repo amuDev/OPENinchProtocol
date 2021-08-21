@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface/ICompoundRegistry.sol";
-import "./UniversalIERC20.sol";
+import "./UniversalERC20.sol";
 
 
 contract CompoundRegistry is Ownable, ICompoundRegistry {
-    using UniversalIERC20 for IERC20;
+    using UniversalERC20 for IERC20;
 
     ICompoundToken internal constant cETH = ICompoundToken(0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5);
     IERC20 internal constant ETH = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
@@ -23,7 +23,7 @@ contract CompoundRegistry is Ownable, ICompoundRegistry {
     }
 
     function cTokenByToken(IERC20 token) external view override returns(ICompoundToken) {
-        if (UniversalIERC20.isETH(token)) {
+        if (UniversalERC20.isETH(token)) {
             return cETH;
         }
         return ICompoundToken(_cTokenByToken[address(token)]);
