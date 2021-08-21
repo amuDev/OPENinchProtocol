@@ -246,13 +246,13 @@ contract OneSplitWrap is
                 flags[i - 1],
                 destTokenEthPriceTimesGasPrices[i - 1]
             );
-            estimateGasAmount = estimateGasAmount.add(amount);
+            estimateGasAmount = estimateGasAmount + (amount);
 
             if (distribution.length == 0) {
                 distribution = new uint256[](dist.length);
             }
             for (uint j = 0; j < distribution.length; j++) {
-                distribution[j] = distribution[j].add(dist[j] << (8 * (i - 1)));
+                distribution[j] = distribution[j] + (dist[j] << (8 * (i - 1)));
             }
         }
     }

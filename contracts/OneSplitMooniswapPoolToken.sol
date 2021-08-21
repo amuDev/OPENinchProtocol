@@ -144,11 +144,11 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
         for (uint i = 0; i < 2; i++) {
 
             uint256 exchangeAmount = amount
-                .mul(details.tokens[i].reserve)
+                 * (details.tokens[i].reserve)
                 .div(details.totalSupply);
 
             if (toToken.eq(details.tokens[i].token)) {
-                returnAmount = returnAmount.add(exchangeAmount);
+                returnAmount = returnAmount + (exchangeAmount);
                 continue;
             }
 
@@ -161,7 +161,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
                 0
             );
 
-            returnAmount = returnAmount.add(ret);
+            returnAmount = returnAmount + (ret);
             for (uint j = 0; j < distribution.length; j++) {
                 distribution[j] |= dist[j] << (i * 8);
             }
@@ -217,7 +217,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
         for (uint i = 0; i < 2; i++) {
             returnAmount = Math.min(
                 returnAmount,
-                details.totalSupply.mul(amounts[i]).div(details.tokens[i].reserve)
+                details.totalSupply * (amounts[i]).div(details.tokens[i].reserve)
             );
         }
 

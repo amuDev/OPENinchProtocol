@@ -336,8 +336,6 @@ abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
 
 
 contract OneSplitView is IOneSplitView, OneSplitRoot {
-    
-    using DisabledFlags for uint256;
 
     function getExpectedReturn(
         IERC20 fromToken,
@@ -488,11 +486,11 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         for (uint i = 0; i < DEXES_COUNT; i++) {
             if (args.distribution[i] > 0) {
                 if (args.distribution[i] == args.parts || exact[i] || DisableFlags.check(args.flags,FLAG_DISABLE_SPLIT_RECALCULATION)) {
-                    estimateGasAmount = estimateGasAmount.add(args.gases[i]);
+                    estimateGasAmount = estimateGasAmount + (args.gases[i]);
                     int256 value = args.matrix[i][args.distribution[i]];
-                    returnAmount = returnAmount.add(uint256(
+                    returnAmount = returnAmount + (uint256(
                         int256(value == VERY_NEGATIVE_VALUE ? int256(0) : value) +
-                        int256(args.gases[i].mul(args.destTokenEthPriceTimesGasPrice).div(1e18))
+                        int256(args.gases[i] * (args.destTokenEthPriceTimesGasPrice).div(1e18))
                     ));
                 }
                 else {
@@ -1044,8 +1042,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         if (amount == 0) {
             return 0;
         }
-        return amount.mul(toBalance).mul(997).div(
-            fromBalance.mul(1000).add(amount.mul(997))
+        return amount * (toBalance) * (997).div(
+            fromBalance * (1000) + (amount * (997))
         );
     }
 
@@ -1118,7 +1116,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             (rets, gas) = _calculateUniswap(
                 midToken,
                 destToken,
-                _linearInterpolation(amount.mul(1e18).div(midTokenPrice), parts),
+                _linearInterpolation(amount * (1e18).div(midTokenPrice), parts),
                 flags
             );
             return (rets, gas + gas1);
@@ -1132,7 +1130,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             );
 
             for (uint i = 0; i < parts; i++) {
-                rets[i] = rets[i].mul(midTokenPrice).div(1e18);
+                rets[i] = rets[i] * (midTokenPrice).div(1e18);
             }
             return (rets, gas + gas2);
         }
@@ -1374,7 +1372,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             if (i > 0 && rets[i - 1] == 0) {
                 break;
             }
-            rets[i] = amount.mul(i + 1).div(parts);
+            rets[i] = amount * (i + 1).div(parts);
 
             if (!UniversalERC20.isETH(fromToken)) {
                 if (fromHint.length == 0) {
@@ -1388,7 +1386,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     flags,
                     fromHint
                 );
-                rets[i] = rate.mul(rets[i]).div(fromTokenDecimals);
+                rets[i] = rate * (rets[i]).div(fromTokenDecimals);
             }
 
             if (!UniversalERC20.isETH(destToken) && rets[i] > 0) {
@@ -1403,7 +1401,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     10,
                     destHint
                 );
-                rets[i] = rate.mul(rets[i]).mul(destTokenDecimals).div(1e36);
+                rets[i] = rate * (rets[i]) * (destTokenDecimals).div(1e36);
             }
         }
 
@@ -1445,7 +1443,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         //     }
         // }
 
-        // return (rets, path.length.mul(150_000));
+        // return (rets, path.length * (150_000));
     }
 
     function calculateOasis(
@@ -1502,9 +1500,9 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         }
 
         for (uint i = 0; i < amounts.length; i++) {
-            uint256 amount = amounts[i].sub(amounts[i].mul(fee).div(1e18));
-            rets[i] = amount.mul(destBalance).div(
-                fromBalance.add(amount)
+            uint256 amount = amounts[i].sub(amounts[i] * (fee).div(1e18));
+            rets[i] = amount * (destBalance).div(
+                fromBalance + (amount)
             );
         }
 
@@ -1538,7 +1536,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         (uint256[] memory results, uint256 gas1) = calculateMooniswap(fromToken, ZERO_ADDRESS, amount, parts, flags);
         (rets, gas) = calculateMooniswapMany(ZERO_ADDRESS, destToken, results);
-        gas = gas.add(gas1);
+        gas = gas + (gas1);
     }
 
     function calculateMooniswapOverDAI(
@@ -1554,7 +1552,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         (uint256[] memory results, uint256 gas1) = calculateMooniswap(fromToken, dai, amount, parts, flags);
         (rets, gas) = calculateMooniswapMany(dai, destToken, results);
-        gas = gas.add(gas1);
+        gas = gas + (gas1);
     }
 
     function calculateMooniswapOverUSDC(
@@ -1570,7 +1568,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         (uint256[] memory results, uint256 gas1) = calculateMooniswap(fromToken, usdc, amount, parts, flags);
         (rets, gas) = calculateMooniswapMany(usdc, destToken, results);
-        gas = gas.add(gas1);
+        gas = gas + (gas1);
     }
 
     function calculateUniswapV2(
@@ -1853,7 +1851,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 lastNonZeroIndex = 0;
         for (uint i = 0; i < distribution.length; i++) {
             if (distribution[i] > 0) {
-                parts = parts.add(distribution[i]);
+                parts = parts + (distribution[i]);
                 lastNonZeroIndex = i;
             }
         }
@@ -1874,7 +1872,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
                 continue;
             }
 
-            uint256 swapAmount = amount.mul(distribution[i]).div(parts);
+            uint256 swapAmount = amount * (distribution[i]).div(parts);
             if (i == lastNonZeroIndex) {
                 swapAmount = remainingAmount;
             }

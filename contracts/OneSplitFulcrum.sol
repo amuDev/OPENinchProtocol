@@ -103,7 +103,7 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
                 (returnAmount, estimateGasAmount, distribution) = _fulcrumGetExpectedReturn(
                     underlying,
                     destToken,
-                    amount.mul(fulcrumRate).div(1e18),
+                    amount * (fulcrumRate).div(1e18),
                     parts,
                     flags,
                     destTokenEthPriceTimesGasPrice
@@ -121,9 +121,9 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
                     amount,
                     parts,
                     flags,
-                    _destTokenEthPriceTimesGasPrice.mul(fulcrumRate).div(1e18)
+                    _destTokenEthPriceTimesGasPrice * (fulcrumRate).div(1e18)
                 );
-                return (returnAmount.mul(1e18).div(fulcrumRate), estimateGasAmount + 354_000, distribution);
+                return (returnAmount * (1e18).div(fulcrumRate), estimateGasAmount + 354_000, distribution);
             }
         }
 

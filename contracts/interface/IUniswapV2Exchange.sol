@@ -34,9 +34,9 @@ library UniswapV2ExchangeLib {
         needSync = (reserveIn < reserve0 || reserveOut < reserve1);
         needSkim = !needSync && (reserveIn > reserve0 || reserveOut > reserve1);
 
-        uint256 amountInWithFee = amountIn.mul(997);
-        uint256 numerator = amountInWithFee.mul(Math.min(reserveOut, reserve1));
-        uint256 denominator = Math.min(reserveIn, reserve0).mul(1000).add(amountInWithFee);
+        uint256 amountInWithFee = amountIn * (997);
+        uint256 numerator = amountInWithFee * (Math.min(reserveOut, reserve1));
+        uint256 denominator = Math.min(reserveIn, reserve0) * (1000) + (amountInWithFee);
         result = (denominator == 0) ? 0 : numerator.div(denominator);
     }
 }

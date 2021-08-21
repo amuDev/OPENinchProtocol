@@ -9,7 +9,7 @@ const OneSplitWrap = artifacts.require('OneSplitWrap');
 const IMooniswapRegistry = artifacts.require('IMooniswapRegistry');
 const IMooniswap = artifacts.require('IMooniswap');
 
-const DISABLE_ALL = new BN('20000000', 16).add(new BN('40000000', 16));
+const DISABLE_ALL = new BN('20000000', 16) + (new BN('40000000', 16));
 const CURVE_SYNTHETIX = new BN('40000', 16);
 const CURVE_COMPOUND = new BN('1000', 16);
 const CURVE_ALL = new BN('200000000000', 16);
@@ -57,7 +57,7 @@ contract('OneSplit', function ([_, addr1]) {
                 '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
                 '1000000000000000000', // 1.0
                 10,
-                DISABLE_ALL.add(MOONISWAP_ALL), // enable only Mooniswap
+                DISABLE_ALL + (MOONISWAP_ALL), // enable only Mooniswap
             );
 
             console.log('Swap: 1 ETH');
@@ -73,7 +73,7 @@ contract('OneSplit', function ([_, addr1]) {
                 '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
                 '1000000000000000000', // 1.0
                 10,
-                DISABLE_ALL.add(BALANCER_ALL), // enable only Mooniswap
+                DISABLE_ALL + (BALANCER_ALL), // enable only Mooniswap
             );
 
             console.log('Swap: 1 ETH');
@@ -121,7 +121,7 @@ contract('OneSplit', function ([_, addr1]) {
                 '0xe2f2a5C287993345a840Db3B0845fbC70f5935a5', // mUSD
                 '2000000', // 2.0
                 1,
-                DISABLE_ALL.add(web3.utils.toBN('0x20000000000')), // enable only mStable mUSD
+                DISABLE_ALL + (web3.utils.toBN('0x20000000000')), // enable only mStable mUSD
             );
 
             console.log('Swap: 2 USDC');
@@ -169,7 +169,7 @@ contract('OneSplit', function ([_, addr1]) {
                 '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
                 '1000000000000000000', // 1.0
                 10,
-                DISABLE_ALL.add(KYBER_ALL), // enable only Kyber
+                DISABLE_ALL + (KYBER_ALL), // enable only Kyber
             );
 
             console.log('Swap: 1 ETH');
@@ -185,7 +185,7 @@ contract('OneSplit', function ([_, addr1]) {
                 '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
                 '50000000000000000000', // 50.0
                 10,
-                DISABLE_ALL.add(KYBER_ALL), // enable only Kyber
+                DISABLE_ALL + (KYBER_ALL), // enable only Kyber
             );
 
             console.log('Swap: 1 ETH');
@@ -201,7 +201,7 @@ contract('OneSplit', function ([_, addr1]) {
                 '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // WBTC
                 '100000000000', // 1000.00
                 10,
-                DISABLE_ALL.add(CURVE_ALL), // enable only all curves
+                DISABLE_ALL + (CURVE_ALL), // enable only all curves
             );
 
             console.log('Swap: 100 renBTC');
@@ -217,7 +217,7 @@ contract('OneSplit', function ([_, addr1]) {
                 '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
                 '1000000000000000000000000', // 1,000,000.00
                 4,
-                DISABLE_ALL.add(CURVE_COMPOUND).add(CURVE_SYNTHETIX), // enable only all curves
+                DISABLE_ALL + (CURVE_COMPOUND) + (CURVE_SYNTHETIX), // enable only all curves
             );
 
             console.log('Swap: 1,000,000 DAI');

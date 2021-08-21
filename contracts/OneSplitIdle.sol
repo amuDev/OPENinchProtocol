@@ -78,7 +78,7 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
                     (returnAmount, estimateGasAmount, distribution) = _idleGetExpectedReturn(
                         tokens[i].token(),
                         destToken,
-                        amount.mul(tokens[i].tokenPrice()).div(1e18),
+                        amount * (tokens[i].tokenPrice()).div(1e18),
                         parts,
                         flags,
                         destTokenEthPriceTimesGasPrice
@@ -98,9 +98,9 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
                         amount,
                         parts,
                         flags,
-                        _destTokenEthPriceTimesGasPrice.mul(_price).div(1e18)
+                        _destTokenEthPriceTimesGasPrice * (_price).div(1e18)
                     );
-                    return (returnAmount.mul(1e18).div(_price), estimateGasAmount + 1_300_000, distribution);
+                    return (returnAmount * (1e18).div(_price), estimateGasAmount + 1_300_000, distribution);
                 }
             }
         }
