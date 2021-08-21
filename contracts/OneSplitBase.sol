@@ -337,6 +337,8 @@ abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
 
 contract OneSplitView is IOneSplitView, OneSplitRoot {
     
+    using DisabledFlags for uint256;
+
     function getExpectedReturn(
         IERC20 fromToken,
         IERC20 destToken,
@@ -784,7 +786,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts
     ) internal pure returns(uint256[100] memory rets) {
         for (uint i = 0; i < parts; i++) {
-            rets[i] = value.mul(i + 1).div(parts);
+            rets[i] = value * (i + 1) / (parts);
         }
     }
 
