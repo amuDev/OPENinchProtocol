@@ -12,7 +12,7 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
         uint256 parts,
         uint256 flags, // See constants in IOneSplit.sol
         uint256 destTokenEthPriceTimesGasPrice
-    ) override
+    ) virtual override
         public
         view
         returns(
