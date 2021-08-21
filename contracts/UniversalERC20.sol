@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/IERC20/utils/SafeIERC20.sol";
 library UniversalERC20 {
 
     using SafeMath for uint256;
-    using SafeIERC20 for IERC20;
+    using SafeERC20 for IERC20;
 
     IERC20 private constant ZERO_ADDRESS = IERC20(0x0000000000000000000000000000000000000000);
     IERC20 private constant ETH_ADDRESS = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
