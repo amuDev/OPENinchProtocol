@@ -322,8 +322,8 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         // Return
         returnAmount = afterBalances.ofDestToken.sub(beforeBalances.ofDestToken);
         require(returnAmount >= minReturn, "OneSplit: actual return amount is less than minReturn");
-        tokens.last().universalTransfer(referral, returnAmount.mul(feePercent).div(1e18));
-        tokens.last().universalTransfer(msg.sender, returnAmount.sub(returnAmount.mul(feePercent).div(1e18)));
+        tokens.last().universalTransfer(referral, returnAmount * (feePercent) / (1e18));
+        tokens.last().universalTransfer(msg.sender, returnAmount - (returnAmount * (feePercent) / (1e18)));
 
         emit Swapped(
             tokens.first(),
@@ -362,9 +362,9 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     function _chiBurnOrSell(address payable sponsor, uint256 amount) internal {
         IUniswapV2Exchange exchange = IUniswapV2Exchange(0xa6f3ef841d371a82ca757FaD08efc0DeE2F1f5e2);
         (uint256 sellRefund,,) = UniswapV2ExchangeLib.getReturn(exchange, chi, weth, amount);
-        uint256 burnRefund = amount.mul(18_000).mul(tx.gasprice);
+        uint256 burnRefund = amount * 18_000 * (tx.gasprice);
 
-        if (sellRefund < burnRefund.add(tx.gasprice.mul(36_000))) {
+        if (sellRefund < burnRefund + (tx.gasprice * (36_000))){
             chi.freeFromUpTo(sponsor, amount);
         }
         else {
