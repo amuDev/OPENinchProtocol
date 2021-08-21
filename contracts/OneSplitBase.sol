@@ -1030,7 +1030,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         }
 
         uint256 maxRet = abi.decode(data, (uint256));
-        uint256 available = destToken.universalBalanceOf(address(dforceSwap));
+        uint256 available = UniversalERC20.universalBalanceOf(destToken,address(dforceSwap));
         if (maxRet > available) {
             return (new uint256[](parts), 0);
         }
@@ -1061,7 +1061,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                 return (new uint256[](rets.length), 0);
             }
 
-            uint256 fromTokenBalance = fromToken.universalBalanceOf(address(fromExchange));
+            uint256 fromTokenBalance = UniversalERC20.universalBalanceOf(fromToken,address(fromExchange));
             uint256 fromEtherBalance = address(fromExchange).balance;
 
             for (uint i = 0; i < rets.length; i++) {
@@ -1076,7 +1076,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             }
 
             uint256 toEtherBalance = address(toExchange).balance;
-            uint256 toTokenBalance = destToken.universalBalanceOf(address(toExchange));
+            uint256 toTokenBalance = UniversalERC20.universalBalanceOf(destToken,address(toExchange));
 
             for (uint i = 0; i < rets.length; i++) {
                 rets[i] = _calculateUniswapFormula(toEtherBalance, toTokenBalance, rets[i]);
@@ -1865,7 +1865,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         }
 
         fromToken.universalTransferFrom(msg.sender, address(this), amount);
-        uint256 remainingAmount = fromToken.universalBalanceOf(address(this));
+        uint256 remainingAmount = UniversalERC20.universalBalanceOf(fromToken,address(this));
 
         for (uint i = 0; i < distribution.length; i++) {
             if (distribution[i] == 0) {
@@ -1880,10 +1880,10 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             reserves[i](fromToken, destToken, swapAmount, flags);
         }
 
-        returnAmount = destToken.universalBalanceOf(address(this));
+        returnAmount = UniversalERC20.universalBalanceOf(destToken,address(this));
         require(returnAmount >= minReturn, "OneSplit: Return amount was not enough");
         destToken.universalTransfer(msg.sender, returnAmount);
-        fromToken.universalTransfer(msg.sender, fromToken.universalBalanceOf(address(this)));
+        fromToken.universalTransfer(msg.sender, UniversalERC20.universalBalanceOf(fromToken,address(this)));
     }
 
     // Swap helpers
@@ -2153,7 +2153,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             ICompoundToken toCompound = compoundRegistry.cTokenByToken(destToken);
             _swapOnUniswap(fromToken, IERC20(toCompound), amount, flags);
             toCompound.redeem(IERC20(toCompound).universalBalanceOf(address(this)));
-            destToken.universalBalanceOf(address(this));
+            UniversalERC20.universalBalanceOf(destToken,address(this));
             return;
         }
     }
