@@ -63,8 +63,6 @@ interface IOneSplitView {
         );
 }
 
-/// @dev How do we use flags.check instead of DisableFlags.check?
-/// check line 510 of this file
 library DisableFlags {
     function check(uint256 flags, uint256 flag) public pure returns(bool) { /// @dev  internal -> public
         return (flags & flag) != 0;
@@ -491,7 +489,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         for (uint i = 0; i < DEXES_COUNT; i++) {
             if (args.distribution[i] > 0) {
-                if (args.distribution[i] == args.parts || exact[i] || DisableFlags.check(args.flags,FLAG_DISABLE_SPLIT_RECALCULATION)) {
+                if (args.distribution[i] == args.parts || exact[i] || args.flags.check(FLAG_DISABLE_SPLIT_RECALCULATION)) {
                     estimateGasAmount = estimateGasAmount + (args.gases[i]);
                     int256 value = args.matrix[i][args.distribution[i]];
                     returnAmount = returnAmount.add(uint256(
