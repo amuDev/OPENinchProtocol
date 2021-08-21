@@ -336,6 +336,12 @@ abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
 
 
 contract OneSplitView is IOneSplitView, OneSplitRoot {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+
+    using UniversalERC20 for IERC20;
+
+    using ChaiHelper for IChai;
 
     function getExpectedReturn(
         IERC20 fromToken,
@@ -488,9 +494,9 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                 if (args.distribution[i] == args.parts || exact[i] || DisableFlags.check(args.flags,FLAG_DISABLE_SPLIT_RECALCULATION)) {
                     estimateGasAmount = estimateGasAmount + (args.gases[i]);
                     int256 value = args.matrix[i][args.distribution[i]];
-                    returnAmount = returnAmount + (uint256(
+                    returnAmount = returnAmount.add(uint256(
                         int256(value == VERY_NEGATIVE_VALUE ? int256(0) : value) +
-                        int256(args.gases[i] * (args.destTokenEthPriceTimesGasPrice) / (1e18))
+                        int256(args.gases[i].mul(args.destTokenEthPriceTimesGasPrice).div(1e18))
                     ));
                 }
                 else {
@@ -723,14 +729,14 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
     ) internal view returns(uint256[] memory rets) {
         rets = new uint256[](parts);
 
-        int128 i = 0;
-        int128 j = 0;
+        uint256 i = 0;
+        uint256 j = 0;
         for (uint t = 0; t < tokens.length; t++) {
             if (fromToken == tokens[t]) {
-                i = int128(t + 1);
+                i = uint256(t + 1);
             }
             if (destToken == tokens[t]) {
-                j = int128(t + 1);
+                j = uint256(t + 1);
             }
         }
 
@@ -1057,7 +1063,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!fromToken.isETH()) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
-            if (fromExchange == IUniswapExchange(0)) {
+            if (fromExchange == IUniswapExchange(address(0))) {
                 return (new uint256[](rets.length), 0);
             }
 
@@ -1071,7 +1077,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!destToken.isETH()) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
-            if (toExchange == IUniswapExchange(0)) {
+            if (toExchange == IUniswapExchange(address(0))) {
                 return (new uint256[](rets.length), 0);
             }
 
@@ -1155,7 +1161,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!midPreToken.isETH()) {
             ICompoundToken midToken = compoundRegistry.cTokenByToken(midPreToken);
-            if (midToken != ICompoundToken(0)) {
+            if (midToken != ICompoundToken(address(0))) {
                 return _calculateUniswapWrapped(
                     fromToken,
                     midToken,
@@ -1216,7 +1222,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!midPreToken.isETH()) {
             IAaveToken midToken = aaveRegistry.aTokenByToken(midPreToken);
-            if (midToken != IAaveToken(0)) {
+            if (midToken != IAaveToken(address(0))) {
                 return _calculateUniswapWrapped(
                     fromToken,
                     midToken,
@@ -1455,7 +1461,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         rets = _linearInterpolation(amount, parts);
         for (uint i = 0; i < parts; i++) {
-            (bool success, bytes memory data) = address(oasisExchange).staticcall.gas(500000)(
+            (bool success, bytes memory data) = address(oasisExchange).staticcall{gas: 500000}(
                 abi.encodeWithSelector(
                     oasisExchange.getBuyAmount.selector,
                     destToken.isETH() ? weth : destToken,
@@ -1488,7 +1494,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             fromToken.isETH() ? ZERO_ADDRESS : fromToken,
             destToken.isETH() ? ZERO_ADDRESS : destToken
         );
-        if (mooniswap == IMooniswap(0)) {
+        if (mooniswap == IMooniswap(address(0))) {
             return (rets, 0);
         }
 
@@ -1660,7 +1666,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         IERC20 fromTokenReal = fromToken.isETH() ? weth : fromToken;
         IERC20 destTokenReal = destToken.isETH() ? weth : destToken;
         IUniswapV2Exchange exchange = uniswapV2.getPair(fromTokenReal, destTokenReal);
-        if (exchange != IUniswapV2Exchange(0)) {
+        if (exchange != IUniswapV2Exchange(address(0))) {
             uint256 fromTokenBalance = fromTokenReal.universalBalanceOf(address(exchange));
             uint256 destTokenBalance = destTokenReal.universalBalanceOf(address(exchange));
             for (uint i = 0; i < amounts.length; i++) {
@@ -1732,6 +1738,11 @@ abstract contract OneSplitBaseWrap is OneSplitRoot { // removed IOneSplit,
 
 
 contract OneSplit is IOneSplit, OneSplitRoot {
+
+    using SafeMath for uint256;
+    using UniversalERC20 for IERC20;
+    using UniswapV2ExchangeLib for IUniswapV2Exchange;
+
     IOneSplitView public oneSplitView;
 
     constructor(IOneSplitView _oneSplitView) public {
@@ -1858,7 +1869,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
 
         if (parts == 0) {
             if (fromToken.isETH()) {
-                msg.sender.transfer(msg.value);
+                payable(msg.sender).transfer(msg.value);
                 return msg.value;
             }
             return amount;
@@ -1894,8 +1905,8 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == dai ? 1 : 0) + (fromToken == usdc ? 2 : 0);
-        int128 j = (destToken == dai ? 1 : 0) + (destToken == usdc ? 2 : 0);
+        int128 i = (fromToken == dai ? int128(1) : int128(0)) + (fromToken == usdc ? int128(2) : int128(0));
+        int128 j = (destToken == dai ? int128(1) : int128(0)) + (destToken == usdc ? int128(2) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -1910,12 +1921,12 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == dai ? 1 : 0) +
-            (fromToken == usdc ? 2 : 0) +
-            (fromToken == usdt ? 3 : 0);
-        int128 j = (destToken == dai ? 1 : 0) +
-            (destToken == usdc ? 2 : 0) +
-            (destToken == usdt ? 3 : 0);
+        int128 i = (fromToken == dai ? int128(1) : int128(0)) +
+            (fromToken == usdc ? int128(2) : int128(0)) +
+            (fromToken == usdt ? int128(3) : int128(0));
+        int128 j = (destToken == dai ? int128(1) : int128(0)) +
+            (destToken == usdc ? int128(2) : int128(0)) +
+            (destToken == usdt ? int128(3) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -1930,14 +1941,14 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == dai ? 1 : 0) +
-            (fromToken == usdc ? 2 : 0) +
-            (fromToken == usdt ? 3 : 0) +
-            (fromToken == tusd ? 4 : 0);
-        int128 j = (destToken == dai ? 1 : 0) +
-            (destToken == usdc ? 2 : 0) +
-            (destToken == usdt ? 3 : 0) +
-            (destToken == tusd ? 4 : 0);
+        int128 i = (fromToken == dai ? int128(1) : int128(0)) +
+            (fromToken == usdc ? int128(2) : int128(0)) +
+            (fromToken == usdt ? int128(3) : int128(0)) +
+            (fromToken == tusd ? int128(4) : int128(0));
+        int128 j = (destToken == dai ? int128(1) : int128(0)) +
+            (destToken == usdc ? int128(2) : int128(0)) +
+            (destToken == usdt ? int128(3) : int128(0)) +
+            (destToken == tusd ? int128(4) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -1952,14 +1963,14 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == dai ? 1 : 0) +
-            (fromToken == usdc ? 2 : 0) +
-            (fromToken == usdt ? 3 : 0) +
-            (fromToken == busd ? 4 : 0);
-        int128 j = (destToken == dai ? 1 : 0) +
-            (destToken == usdc ? 2 : 0) +
-            (destToken == usdt ? 3 : 0) +
-            (destToken == busd ? 4 : 0);
+        int128 i = (fromToken == dai ? int128(1) : int128(0)) +
+            (fromToken == usdc ? int128(2) : int128(0)) +
+            (fromToken == usdt ? int128(3) : int128(0)) +
+            (fromToken == busd ? int128(4) : int128(0));
+        int128 j = (destToken == dai ? int128(1) : int128(0)) +
+            (destToken == usdc ? int128(2) : int128(0)) +
+            (destToken == usdt ? int128(3) : int128(0)) +
+            (destToken == busd ? int128(4) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -1974,14 +1985,14 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == dai ? 1 : 0) +
-            (fromToken == usdc ? 2 : 0) +
-            (fromToken == usdt ? 3 : 0) +
-            (fromToken == susd ? 4 : 0);
-        int128 j = (destToken == dai ? 1 : 0) +
-            (destToken == usdc ? 2 : 0) +
-            (destToken == usdt ? 3 : 0) +
-            (destToken == susd ? 4 : 0);
+        int128 i = (fromToken == dai ? int128(1) : int128(0)) +
+            (fromToken == usdc ? int128(2) : int128(0)) +
+            (fromToken == usdt ? int128(3) : int128(0)) +
+            (fromToken == susd ? int128(4) : int128(0));
+        int128 j = (destToken == dai ? int128(1) : int128(0)) +
+            (destToken == usdc ? int128(2) : int128(0)) +
+            (destToken == usdt ? int128(3) : int128(0)) +
+            (destToken == susd ? int128(4) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -1996,14 +2007,14 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == dai ? 1 : 0) +
-            (fromToken == usdc ? 2 : 0) +
-            (fromToken == usdt ? 3 : 0) +
-            (fromToken == pax ? 4 : 0);
-        int128 j = (destToken == dai ? 1 : 0) +
-            (destToken == usdc ? 2 : 0) +
-            (destToken == usdt ? 3 : 0) +
-            (destToken == pax ? 4 : 0);
+        int128 i = (fromToken == dai ? int128(1) : int128(0)) +
+            (fromToken == usdc ? int128(2) : int128(0)) +
+            (fromToken == usdt ? int128(3) : int128(0)) +
+            (fromToken == pax ? int128(4) : int128(0));
+        int128 j = (destToken == dai ? int128(1) : int128(0)) +
+            (destToken == usdc ? int128(2) : int128(0)) +
+            (destToken == usdt ? int128(3) : int128(0)) +
+            (destToken == pax ? int128(4) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -2049,10 +2060,10 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == renbtc ? 1 : 0) +
-            (fromToken == wbtc ? 2 : 0);
-        int128 j = (destToken == renbtc ? 1 : 0) +
-            (destToken == wbtc ? 2 : 0);
+        int128 i = (fromToken == renbtc ? int128(1) : int128(0)) +
+            (fromToken == wbtc ? int128(2) : int128(0));
+        int128 j = (destToken == renbtc ? int128(1) : int128(0)) +
+            (destToken == wbtc ? int128(2) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -2067,12 +2078,12 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == tbtc ? 1 : 0) +
-            (fromToken == wbtc ? 2 : 0) +
-            (fromToken == hbtc ? 3 : 0);
-        int128 j = (destToken == tbtc ? 1 : 0) +
-            (destToken == wbtc ? 2 : 0) +
-            (destToken == hbtc ? 3 : 0);
+        int128 i = (fromToken == tbtc ? int128(1) : int128(0)) +
+            (fromToken == wbtc ? int128(2) : int128(0)) +
+            (fromToken == hbtc ? int128(3) : int128(0));
+        int128 j = (destToken == tbtc ? int128(1) : int128(0)) +
+            (destToken == wbtc ? int128(2) : int128(0)) +
+            (destToken == hbtc ? int128(3) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -2087,12 +2098,12 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 /*flags*/
     ) internal {
-        int128 i = (fromToken == renbtc ? 1 : 0) +
-            (fromToken == wbtc ? 2 : 0) +
-            (fromToken == sbtc ? 3 : 0);
-        int128 j = (destToken == renbtc ? 1 : 0) +
-            (destToken == wbtc ? 2 : 0) +
-            (destToken == sbtc ? 3 : 0);
+        int128 i = (fromToken == renbtc ? int128(1) : int128(0)) +
+            (fromToken == wbtc ? int128(2) : int128(0)) +
+            (fromToken == sbtc ? int128(3) : int128(0));
+        int128 j = (destToken == renbtc ? int128(1) : int128(0)) +
+            (destToken == wbtc ? int128(2) : int128(0)) +
+            (destToken == sbtc ? int128(3) : int128(0));
         if (i == 0 || j == 0) {
             return;
         }
@@ -2121,16 +2132,16 @@ contract OneSplit is IOneSplit, OneSplitRoot {
 
         if (!fromToken.isETH()) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
-            if (fromExchange != IUniswapExchange(0)) {
+            if (fromExchange != IUniswapExchange(address(0))) {
                 fromToken.universalApprove(address(fromExchange), returnAmount);
-                returnAmount = fromExchange.tokenToEthSwapInput(returnAmount, 1, now);
+                returnAmount = fromExchange.tokenToEthSwapInput(returnAmount, 1, block.timestamp);
             }
         }
 
         if (!destToken.isETH()) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
-            if (toExchange != IUniswapExchange(0)) {
-                returnAmount = toExchange.ethToTokenSwapInput.value(returnAmount)(1, now);
+            if (toExchange != IUniswapExchange(address(0))) {
+                returnAmount = toExchange.ethToTokenSwapInput{value:returnAmount}(1, block.timestamp);
             }
         }
     }
@@ -2211,7 +2222,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             destToken.isETH() ? ZERO_ADDRESS : destToken
         );
         fromToken.universalApprove(address(mooniswap), amount);
-        mooniswap.swap.value(fromToken.isETH() ? amount : 0)(
+        mooniswap.swap{value: fromToken.isETH() ? amount : 0}(
             fromToken.isETH() ? ZERO_ADDRESS : fromToken,
             destToken.isETH() ? ZERO_ADDRESS : destToken,
             amount,
@@ -2344,10 +2355,10 @@ contract OneSplit is IOneSplit, OneSplitRoot {
                 fromToken,
                 returnAmount,
                 ETH_ADDRESS,
-                address(this),
-                uint256(-1),
+                payable(address(this)),
+                uint256(0),
                 0,
-                0x68a17B587CAF4f9329f0e372e3A78D23A46De6b5,
+                payable(0x68a17B587CAF4f9329f0e372e3A78D23A46De6b5),
                 (flags >> 255) * 10,
                 fromHint
             );
@@ -2361,14 +2372,14 @@ contract OneSplit is IOneSplit, OneSplitRoot {
                 new uint256[](0)
             );
 
-            returnAmount = kyberNetworkProxy.tradeWithHintAndFee.value(returnAmount)(
+            returnAmount = kyberNetworkProxy.tradeWithHintAndFee{value: returnAmount}(
                 ETH_ADDRESS,
                 returnAmount,
                 destToken,
-                address(this),
-                uint256(-1),
+                payable(address(this)),
+                uint256(0),
                 0,
-                0x68a17B587CAF4f9329f0e372e3A78D23A46De6b5,
+                payable(0x68a17B587CAF4f9329f0e372e3A78D23A46De6b5),
                 (flags >> 255) * 10,
                 destHint
             );
@@ -2387,7 +2398,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             destToken.isETH() ? bancorEtherToken : destToken
         );
         fromToken.universalApprove(address(bancorNetwork), amount);
-        bancorNetwork.convert.value(fromToken.isETH() ? amount : 0)(path, amount, 1);
+        bancorNetwork.convert{value: fromToken.isETH() ? amount : 0}(path, amount, 1);
     }
 
     function _swapOnOasis(
@@ -2397,7 +2408,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 /*flags*/
     ) internal {
         if (fromToken.isETH()) {
-            weth.deposit.value(amount)();
+            weth.deposit{value: amount}(); //TODO: this cant be right
         }
 
         IERC20 approveToken = fromToken.isETH() ? weth : fromToken;
@@ -2421,7 +2432,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 /*flags*/
     ) internal returns(uint256 returnAmount) {
         if (fromToken.isETH()) {
-            weth.deposit.value(amount)();
+            weth.deposit{value: amount}(); //TODO: this cant be right
         }
 
         IERC20 fromTokenReal = fromToken.isETH() ? weth : fromToken;
@@ -2438,7 +2449,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         }
 
         fromTokenReal.universalTransfer(address(exchange), amount);
-        if (uint256(address(fromTokenReal)) < uint256(address(toTokenReal))) {
+        if ((address(fromTokenReal)) < (address(toTokenReal))) { //TODO: removed uint256 conversion 
             exchange.swap(0, returnAmount, address(this), "");
         } else {
             exchange.swap(returnAmount, 0, address(this), "");
@@ -2542,7 +2553,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         );
 
         if (fromToken.isETH()) {
-            weth.deposit.value(amount)();
+            weth.deposit{value: amount}(); //TODO: this cant be right
         }
 
         (fromToken.isETH() ? weth : fromToken).universalApprove(pools[poolIndex], amount);
@@ -2551,7 +2562,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             amount,
             destToken.isETH() ? weth : destToken,
             0,
-            uint256(-1)
+            uint256(0)
         );
 
         if (destToken.isETH()) {

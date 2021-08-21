@@ -5,6 +5,9 @@ import "./OneSplitBase.sol";
 
 
 abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -53,7 +56,7 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_COMPOUND)) {
             IERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 uint256 compoundRate = ICompoundToken(address(fromToken)).exchangeRateStored();
                 (returnAmount, estimateGasAmount, distribution) = _compoundGetExpectedReturn(
                     underlying,
@@ -67,7 +70,7 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
             }
 
             underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 uint256 _destTokenEthPriceTimesGasPrice = destTokenEthPriceTimesGasPrice;
                 uint256 compoundRate = ICompoundToken(address(destToken)).exchangeRateStored();
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
@@ -95,6 +98,10 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
 
 
 abstract contract OneSplitCompound is OneSplitBaseWrap {
+    using DisableFlags for uint256;
+
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
@@ -124,7 +131,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_COMPOUND)) {
             IERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 ICompoundToken(address(fromToken)).redeem(amount);
                 uint256 underlyingAmount = underlying.universalBalanceOf(address(this));
 
@@ -138,7 +145,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
             }
 
             underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 super._swap(
                     fromToken,
                     underlying,
@@ -150,7 +157,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
                 uint256 underlyingAmount = underlying.universalBalanceOf(address(this));
 
                 if (underlying.isETH()) {
-                    cETH.mint.value(underlyingAmount)();
+                    cETH.mint{value: underlyingAmount}(); //TODO: this cant be right
                 } else {
                     underlying.universalApprove(address(destToken), underlyingAmount);
                     ICompoundToken(address(destToken)).mint(underlyingAmount);

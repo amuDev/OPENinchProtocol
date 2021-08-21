@@ -16,7 +16,7 @@ contract OneSplitDMMBase {
         );
 
         if (!success || data.length == 0) {
-            return IERC20(-1);
+            return IERC20(address(0));
         }
 
         return abi.decode(data, (IERC20));
@@ -39,6 +39,9 @@ contract OneSplitDMMBase {
 
 
 abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -87,7 +90,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_DMM)) {
             IERC20 underlying = _getDMMUnderlyingToken(fromToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 if (underlying == weth) {
                     underlying = ETH_ADDRESS;
                 }
@@ -104,7 +107,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
             }
 
             underlying = _getDMMUnderlyingToken(destToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 if (underlying == weth) {
                     underlying = ETH_ADDRESS;
                 }
@@ -138,6 +141,9 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
 
 
 abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
+    using DisableFlags for uint256;
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
@@ -167,7 +173,7 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_DMM)) {
             IERC20 underlying = _getDMMUnderlyingToken(fromToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 IDMM(address(fromToken)).redeem(amount);
                 uint256 balance = underlying.universalBalanceOf(address(this));
                 if (underlying == weth) {
@@ -183,7 +189,7 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
             }
 
             underlying = _getDMMUnderlyingToken(destToken);
-            if (underlying != IERC20(-1)) {
+            if (underlying != IERC20(address(0))) {
                 super._swap(
                     fromToken,
                     (underlying == weth) ? ETH_ADDRESS : underlying,
@@ -194,7 +200,7 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
 
                 uint256 underlyingAmount = ((underlying == weth) ? ETH_ADDRESS : underlying).universalBalanceOf(address(this));
                 if (underlying == weth) {
-                    weth.deposit.value(underlyingAmount);
+                    weth.deposit{value: underlyingAmount};
                 }
 
                 underlying.universalApprove(address(destToken), underlyingAmount);

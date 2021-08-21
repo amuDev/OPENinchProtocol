@@ -142,6 +142,9 @@ contract OneSplitWrap is
     OneSplitDMM,
     OneSplitMooniswapToken
 {
+    using SafeMath for uint256;
+    using UniversalERC20 for IERC20;
+
     IOneSplitView public oneSplitView;
     IOneSplit public oneSplit;
 
@@ -264,7 +267,7 @@ contract OneSplitWrap is
         uint256 minReturn,
         uint256[] memory distribution,
         uint256 flags
-    ) override public payable returns(uint256 returnAmount) {
+    ) public payable returns(uint256 returnAmount) {
         fromToken.universalTransferFrom(msg.sender, address(this), amount);
         uint256 confirmed = fromToken.universalBalanceOf(address(this));
         _swap(fromToken, destToken, confirmed, distribution, flags);
@@ -318,7 +321,7 @@ contract OneSplitWrap is
         uint256 flags
     ) override internal {
         fromToken.universalApprove(address(oneSplit), amount);
-        oneSplit.swap.value(fromToken.isETH() ? amount : 0)(
+        oneSplit.swap{value: (fromToken.isETH() ? amount : 0)}(
             fromToken,
             destToken,
             amount,

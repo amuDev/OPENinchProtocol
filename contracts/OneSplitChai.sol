@@ -5,6 +5,10 @@ import "./OneSplitBase.sol";
 
 
 abstract contract OneSplitChaiView is OneSplitViewWrapBase {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+    using ChaiHelper for IChai;
+    
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -65,6 +69,10 @@ abstract contract OneSplitChaiView is OneSplitViewWrapBase {
 
 
 abstract contract OneSplitChai is OneSplitBaseWrap {
+    using DisableFlags for uint256;
+    using UniversalERC20 for IERC20;
+    using ChaiHelper for IChai;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
