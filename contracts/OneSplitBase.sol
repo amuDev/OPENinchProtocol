@@ -66,7 +66,7 @@ interface IOneSplitView {
 /// @dev How do we use flags.check instead of DisableFlags.check?
 /// check line 510 of this file
 library DisableFlags {
-    function check(uint256 flags, uint256 flag) internal pure returns(bool) {
+    function check(uint256 flags, uint256 flag) public pure returns(bool) { /// @dev  internal -> public
         return (flags & flag) != 0;
     }
 }
@@ -227,7 +227,7 @@ abstract contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
         uint256 mul = _cheapGetPrice(ETH_ADDRESS, destToken, 0.01 ether);
         uint256 div = _cheapGetPrice(ETH_ADDRESS, fromToken, 0.01 ether);
         if (div > 0) {
-            return destTokenEthPriceTimesGasPrice*mul/div;
+            return destTokenEthPriceTimesGasPrice * mul / div;
         }
         return 0;
     }
@@ -273,7 +273,7 @@ abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
         uint256 amount,
         uint256 parts,
         uint256 flags // See constants in IOneSplit.sol
-    ) override
+    ) virtual override
         public
         view
         returns(
@@ -298,7 +298,7 @@ abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    ) override
+    ) virtual override
         public
         view
         returns(
@@ -1702,14 +1702,14 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 }
 
 
-abstract contract OneSplitBaseWrap is IOneSplit, OneSplitRoot { //TODO: ?
+abstract contract OneSplitBaseWrap is OneSplitRoot { // removed IOneSplit,
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags // See constants in IOneSplit.sol
-    ) internal {
+    ) virtual internal {
         if (fromToken == destToken) {
             return;
         }
@@ -1729,11 +1729,11 @@ abstract contract OneSplitBaseWrap is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 amount,
         uint256[] memory distribution,
         uint256 /*flags*/ // See constants in IOneSplit.sol
-    ) internal;
+    ) virtual internal;
 }
 
 
-contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
+contract OneSplit is IOneSplit, OneSplitRoot {
     IOneSplitView public oneSplitView;
 
     constructor(IOneSplitView _oneSplitView) public {
@@ -1744,6 +1744,9 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         // solium-disable-next-line security/no-tx-origin
         require(msg.sender != tx.origin);
     }
+    receive() external payable { //TODO: what is this meant to be (added to solve warning)
+
+    }
 
     function getExpectedReturn(
         IERC20 fromToken,
@@ -1751,7 +1754,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 amount,
         uint256 parts,
         uint256 flags
-    ) override(IOneSplitView, IOneSplit) //TODO: this seems wrong
+    ) override(IOneSplitView, IOneSplit)
         public
         view
         returns(
@@ -1776,7 +1779,7 @@ contract OneSplit is IOneSplit, OneSplitRoot { //TODO: ?
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    ) override(IOneSplit, IOneSplitView) //TODO: this seems wrong
+    ) override(IOneSplit, IOneSplitView)
         public
         view
         returns(

@@ -46,7 +46,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    ) override
+    ) virtual override
         public
         view
         returns(

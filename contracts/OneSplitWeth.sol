@@ -12,7 +12,7 @@ abstract contract OneSplitWethView is OneSplitViewWrapBase {
         uint256 parts,
         uint256 flags,
         uint256 destTokenEthPriceTimesGasPrice
-    ) override
+    ) virtual override
         public
         view
         returns(
@@ -80,7 +80,7 @@ abstract contract OneSplitWeth is OneSplitBaseWrap {
         uint256 amount,
         uint256[] memory distribution,
         uint256 flags
-    )  override internal {
+    ) override internal {
         _wethSwap(
             fromToken,
             destToken,

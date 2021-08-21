@@ -73,6 +73,9 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
     fallback() external payable {
         revert("OneSplit: do not send ETH directly");
     }
+    receive() external payable { //TODO: what is this meant to be (added to solve warning)
+
+    }
 
     function setNewImpl(IOneSplitMulti impl) public onlyOwner {
         oneSplitImpl = impl;
@@ -342,7 +345,7 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         if ((flags[0] & (FLAG_ENABLE_CHI_BURN | FLAG_ENABLE_CHI_BURN_BY_ORIGIN)) > 0) {
             uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
             _chiBurnOrSell(
-                ((flags[0] & FLAG_ENABLE_CHI_BURN_BY_ORIGIN) > 0) ? tx.origin : msg.sender, //TODO: what is this?
+                ((flags[0] & FLAG_ENABLE_CHI_BURN_BY_ORIGIN) > 0) ? tx.origin : msg.sender,
                 (gasSpent + 14154) / 41947
             );
         }
