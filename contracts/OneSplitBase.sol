@@ -335,7 +335,6 @@ abstract contract OneSplitViewWrapBase is IOneSplitView, OneSplitRoot {
 
 
 contract OneSplitView is IOneSplitView, OneSplitRoot {
-
     using SafeMath for uint256;
     using DisableFlags for uint256;
 

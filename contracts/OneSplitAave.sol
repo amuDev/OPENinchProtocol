@@ -5,6 +5,8 @@ import "./OneSplitBase.sol";
 
 
 abstract contract OneSplitAaveView is OneSplitViewWrapBase {
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -92,6 +94,9 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
 
 
 abstract contract OneSplitAave is OneSplitBaseWrap {
+    using DisableFlags for uint256;
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
@@ -146,7 +151,7 @@ abstract contract OneSplitAave is OneSplitBaseWrap {
                 uint256 underlyingAmount = underlying.universalBalanceOf(address(this));
 
                 underlying.universalApprove(aave.core(), underlyingAmount);
-                aave.deposit.value(underlying.isETH() ? underlyingAmount : 0)(
+                aave.deposit{value: (underlying.isETH() ? underlyingAmount : 0)}(
                     underlying.isETH() ? ETH_ADDRESS : underlying,
                     underlyingAmount,
                     1101

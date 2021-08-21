@@ -5,6 +5,8 @@ import "./OneSplitBase.sol";
 
 
 abstract contract OneSplitMStableView is OneSplitViewWrapBase {
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -99,6 +101,11 @@ abstract contract OneSplitMStableView is OneSplitViewWrapBase {
 
 
 abstract contract OneSplitMStable is OneSplitBaseWrap {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,

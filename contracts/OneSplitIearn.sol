@@ -26,6 +26,9 @@ contract OneSplitIearnBase {
 
 
 abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
+    using SafeMath for uint256;
+    using DisableFlags for uint256;
+
     function getExpectedReturnWithGas(
         IERC20 fromToken,
         IERC20 destToken,
@@ -130,6 +133,9 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
 
 
 abstract contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
+    using DisableFlags for uint256;
+    using UniversalERC20 for IERC20;
+
     function _swap(
         IERC20 fromToken,
         IERC20 destToken,
