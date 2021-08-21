@@ -319,8 +319,8 @@ contract OneSplitAudit is IOneSplit, IOneSplitConsts, Ownable {
         // Return
         returnAmount = afterBalances.ofDestToken.sub(beforeBalances.ofDestToken);
         require(returnAmount >= minReturn, "OneSplit: actual return amount is less than minReturn");
-        tokens.last().universalTransfer(referral, returnAmount.mul(feePercent).div(1e18));
-        tokens.last().universalTransfer(msg.sender, returnAmount.sub(returnAmount.mul(feePercent).div(1e18)));
+        tokens.last().universalTransfer(referral, returnAmount * (feePercent) / (1e18));
+        tokens.last().universalTransfer(msg.sender, returnAmount - (returnAmount * (feePercent) / (1e18)));
 
         emit Swapped(
             tokens.first(),

@@ -507,7 +507,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         pure
         returns(function(IERC20,IERC20,uint256,uint256,uint256) view returns(uint256[] memory, uint256)[DEXES_COUNT] memory)
     {
-        bool invert = DisableFlags.check(flags & FLAG_DISABLE_ALL_SPLIT_SOURCES);
+        bool invert = DisableFlags.check(flags, FLAG_DISABLE_ALL_SPLIT_SOURCES);
         return [
             invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP)            ? _calculateNoReturn : calculateUniswap,
             _calculateNoReturn, // invert != DisableFlags.check(flags, FLAG_DISABLE_KYBER) ? _calculateNoReturn : calculateKyber,
@@ -658,14 +658,14 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                 musd.getSwapOutput.selector,
                 fromToken,
                 destToken,
-                amount.mul(parts.div(i)).div(parts)
+                amount * (parts/i) / (parts)
             ));
 
             if (success && data.length > 0) {
                 (,, uint256 maxRet) = abi.decode(data, (bool,string,uint256));
                 if (maxRet > 0) {
-                    for (uint j = 0; j < parts.div(i); j++) {
-                        rets[j] = maxRet.mul(j + 1).div(parts.div(i));
+                    for (uint j = 0; j < parts/i; j++) {
+                        rets[j] = maxRet * (j + 1) / (parts / (i));
                     }
                     break;
                 }
@@ -705,7 +705,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         for (uint k = 0; k < 8 && balances[k] > 0; k++) {
             precisions[k] = 10 ** (18 - (haveUnderlying ? underlying_decimals : decimals)[k]);
             if (haveUnderlying) {
-                rates[k] = underlying_balances[k].mul(1e18).div(balances[k]);
+                rates[k] = underlying_balances[k] * 1e18 / (balances[k]);
             } else {
                 rates[k] = 1e18;
             }
@@ -1153,7 +1153,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             midPreToken = destToken;
         }
 
-        if (!UniversalERC20.isETH(token)) {
+        if (!UniversalERC20.isETH(midPreToken)) {
             ICompoundToken midToken = compoundRegistry.cTokenByToken(midPreToken);
             if (midToken != ICompoundToken(0)) {
                 return _calculateUniswapWrapped(
@@ -1214,8 +1214,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             midPreToken = destToken;
         }
 
-        if (!UniversalERC20.isETH(token)) {
-        if (!UniversalERC20.isETH(token)) {
+        if (!UniversalERC20.isETH(midPreToken)) {
             IAaveToken midToken = aaveRegistry.aTokenByToken(midPreToken);
             if (midToken != IAaveToken(0)) {
                 return _calculateUniswapWrapped(
