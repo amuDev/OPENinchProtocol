@@ -25,8 +25,8 @@ library UniswapV2ExchangeLib {
         IERC20 destToken,
         uint amountIn
     ) internal view returns (uint256 result, bool needSync, bool needSkim) {
-        uint256 reserveIn = fromToken.universalBalanceOf(address(exchange));
-        uint256 reserveOut = destToken.universalBalanceOf(address(exchange));
+        uint256 reserveIn = UniversalERC20.universalBalanceOf(fromToken,address(exchange));
+        uint256 reserveOut = UniversalERC20.universalBalanceOf(destToken,address(exchange));
         (uint112 reserve0, uint112 reserve1,) = exchange.getReserves();
         if (fromToken > destToken) {
             (reserve0, reserve1) = (reserve1, reserve0);
@@ -34,9 +34,9 @@ library UniswapV2ExchangeLib {
         needSync = (reserveIn < reserve0 || reserveOut < reserve1);
         needSkim = !needSync && (reserveIn > reserve0 || reserveOut > reserve1);
 
-        uint256 amountInWithFee = amountIn.mul(997);
-        uint256 numerator = amountInWithFee.mul(Math.min(reserveOut, reserve1));
-        uint256 denominator = Math.min(reserveIn, reserve0).mul(1000).add(amountInWithFee);
-        result = (denominator == 0) ? 0 : numerator.div(denominator);
+        uint256 amountInWithFee = amountIn * (997);
+        uint256 numerator = amountInWithFee * (Math.min(reserveOut, reserve1));
+        uint256 denominator = Math.min(reserveIn, reserve0) * (1000) + (amountInWithFee);
+        result = (denominator == 0) ? 0 : numerator / (denominator);
     }
 }

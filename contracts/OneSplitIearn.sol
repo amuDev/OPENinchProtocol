@@ -75,7 +75,7 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (!flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == !flags.check(FLAG_DISABLE_IEARN)) {
+        if (!DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == !DisableFlags.check(flags, FLAG_DISABLE_IEARN)) {
             IIearn[13] memory yTokens = _yTokens();
 
             for (uint i = 0; i < yTokens.length; i++) {
@@ -84,8 +84,8 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
                         yTokens[i].token(),
                         destToken,
                         amount
-                            .mul(yTokens[i].calcPoolValueInToken())
-                            .div(yTokens[i].totalSupply()),
+                             * (yTokens[i].calcPoolValueInToken())
+                             / (yTokens[i].totalSupply()),
                         parts,
                         flags,
                         destTokenEthPriceTimesGasPrice
@@ -105,14 +105,14 @@ abstract contract OneSplitIearnView is OneSplitViewWrapBase, OneSplitIearnBase {
                         parts,
                         flags,
                         _destTokenEthPriceTimesGasPrice
-                            .mul(yTokens[i].calcPoolValueInToken())
-                            .div(yTokens[i].totalSupply())
+                             * (yTokens[i].calcPoolValueInToken())
+                             / (yTokens[i].totalSupply())
                     );
 
                     return(
                         returnAmount
-                            .mul(yTokens[i].totalSupply())
-                            .div(yTokens[i].calcPoolValueInToken()),
+                             * (yTokens[i].totalSupply())
+                             / (yTokens[i].calcPoolValueInToken()),
                         estimateGasAmount + 743_000,
                         distribution
                     );
@@ -163,7 +163,7 @@ abstract contract OneSplitIearn is OneSplitBaseWrap, OneSplitIearnBase {
             return;
         }
 
-        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_IEARN)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_IEARN)) {
             IIearn[13] memory yTokens = _yTokens();
 
             for (uint i = 0; i < yTokens.length; i++) {

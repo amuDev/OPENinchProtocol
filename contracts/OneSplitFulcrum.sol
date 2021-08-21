@@ -99,14 +99,14 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_FULCRUM)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_FULCRUM)) {
             IERC20 underlying = _isFulcrumToken(fromToken);
             if (underlying != IERC20(address(0))) {
                 uint256 fulcrumRate = IFulcrumToken(address(fromToken)).tokenPrice();
                 (returnAmount, estimateGasAmount, distribution) = _fulcrumGetExpectedReturn(
                     underlying,
                     destToken,
-                    amount.mul(fulcrumRate).div(1e18),
+                    amount * (fulcrumRate) / (1e18),
                     parts,
                     flags,
                     destTokenEthPriceTimesGasPrice
@@ -124,9 +124,9 @@ abstract contract OneSplitFulcrumView is OneSplitViewWrapBase, OneSplitFulcrumBa
                     amount,
                     parts,
                     flags,
-                    _destTokenEthPriceTimesGasPrice.mul(fulcrumRate).div(1e18)
+                    _destTokenEthPriceTimesGasPrice * (fulcrumRate) / (1e18)
                 );
-                return (returnAmount.mul(1e18).div(fulcrumRate), estimateGasAmount + 354_000, distribution);
+                return (returnAmount * (1e18) / (fulcrumRate), estimateGasAmount + 354_000, distribution);
             }
         }
 
@@ -173,7 +173,7 @@ abstract contract OneSplitFulcrum is OneSplitBaseWrap, OneSplitFulcrumBase {
             return;
         }
 
-        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_FULCRUM)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_FULCRUM)) {
             IERC20 underlying = _isFulcrumToken(fromToken);
             if (underlying != IERC20(address(0))) {
                 if (underlying.isETH()) {

@@ -4,10 +4,9 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-
+/// @dev How do we use UniversalERC20.isETH(fromToken) instead of UniversalERC20.istETH(fromToken)
 library UniversalERC20 {
 
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     IERC20 private constant ZERO_ADDRESS = IERC20(0x0000000000000000000000000000000000000000);
@@ -20,11 +19,11 @@ library UniversalERC20 {
 
         if (isETH(token)) {
             payable(to).transfer(amount);
+            return false;
         } else {
             token.safeTransfer(to, amount);
             return true;
         }
-        return false; // it seems like the response value is never used
     }
 
     function universalTransferFrom(IERC20 token, address from, address to, uint256 amount) internal {
@@ -38,7 +37,7 @@ library UniversalERC20 {
                 payable(to).transfer(amount);
             }
             if (msg.value > amount) {
-                payable(msg.sender).transfer(msg.value.sub(amount));
+                payable(msg.sender).transfer(msg.value - (amount));
             }
         } else {
             token.safeTransferFrom(from, to, amount);
@@ -53,7 +52,7 @@ library UniversalERC20 {
         if (isETH(token)) {
             if (msg.value > amount) {
                 // Return remainder if exist
-                payable(msg.sender).transfer(msg.value.sub(amount));
+                payable(msg.sender).transfer(msg.value - (amount));
             }
         } else {
             token.safeTransferFrom(msg.sender, address(this), amount);

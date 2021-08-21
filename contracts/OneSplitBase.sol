@@ -63,7 +63,8 @@ interface IOneSplitView {
         );
 }
 
-
+/// @dev How do we use flags.check instead of DisableFlags.check?
+/// check line 510 of this file
 library DisableFlags {
     function check(uint256 flags, uint256 flag) public pure returns(bool) { /// @dev  internal -> public
         return (flags & flag) != 0;
@@ -193,12 +194,12 @@ abstract contract OneSplitRoot is IOneSplitView, IOneSplitConsts {
         IERC20 fromToken,
         IERC20 destToken
     ) internal view returns(bytes32) {
-        if (!fromToken.isETH() && !destToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken) && !UniversalERC20.isETH(destToken)) {
             return 0;
         }
 
         bytes32[] memory reserveIds = kyberStorage.getReserveIdsPerTokenSrc(
-            fromToken.isETH() ? destToken : fromToken
+            UniversalERC20.isETH(fromToken) ? destToken : fromToken
         );
 
         for (uint i = 0; i < reserveIds.length; i++) {
@@ -341,7 +342,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
     using UniversalERC20 for IERC20;
 
     using ChaiHelper for IChai;
-    
+
     function getExpectedReturn(
         IERC20 fromToken,
         IERC20 destToken,
@@ -490,8 +491,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         for (uint i = 0; i < DEXES_COUNT; i++) {
             if (args.distribution[i] > 0) {
-                if (args.distribution[i] == args.parts || exact[i] || args.flags.check(FLAG_DISABLE_SPLIT_RECALCULATION)) {
-                    estimateGasAmount = estimateGasAmount.add(args.gases[i]);
+                if (args.distribution[i] == args.parts || exact[i] || DisableFlags.check(args.flags,FLAG_DISABLE_SPLIT_RECALCULATION)) {
+                    estimateGasAmount = estimateGasAmount + (args.gases[i]);
                     int256 value = args.matrix[i][args.distribution[i]];
                     returnAmount = returnAmount.add(uint256(
                         int256(value == VERY_NEGATIVE_VALUE ? int256(0) : value) +
@@ -499,9 +500,9 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     ));
                 }
                 else {
-                    (uint256[] memory rets, uint256 gas) = args.reserves[i](args.fromToken, args.destToken, args.amount.mul(args.distribution[i]).div(args.parts), 1, args.flags);
-                    estimateGasAmount = estimateGasAmount.add(gas);
-                    returnAmount = returnAmount.add(rets[0]);
+                    (uint256[] memory rets, uint256 gas) = args.reserves[i](args.fromToken, args.destToken, args.amount * args.distribution[i] / args.parts, 1, args.flags);
+                    estimateGasAmount = estimateGasAmount + gas;
+                    returnAmount = returnAmount + rets[0];
                 }
             }
         }
@@ -512,42 +513,42 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         pure
         returns(function(IERC20,IERC20,uint256,uint256,uint256) view returns(uint256[] memory, uint256)[DEXES_COUNT] memory)
     {
-        bool invert = flags.check(FLAG_DISABLE_ALL_SPLIT_SOURCES);
+        bool invert = DisableFlags.check(flags, FLAG_DISABLE_ALL_SPLIT_SOURCES);
         return [
-            invert != flags.check(FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP)            ? _calculateNoReturn : calculateUniswap,
-            _calculateNoReturn, // invert != flags.check(FLAG_DISABLE_KYBER) ? _calculateNoReturn : calculateKyber,
-            invert != flags.check(FLAG_DISABLE_BANCOR)                                        ? _calculateNoReturn : calculateBancor,
-            invert != flags.check(FLAG_DISABLE_OASIS)                                         ? _calculateNoReturn : calculateOasis,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_COMPOUND)       ? _calculateNoReturn : calculateCurveCompound,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_USDT)           ? _calculateNoReturn : calculateCurveUSDT,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_Y)              ? _calculateNoReturn : calculateCurveY,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_BINANCE)        ? _calculateNoReturn : calculateCurveBinance,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_SYNTHETIX)      ? _calculateNoReturn : calculateCurveSynthetix,
-            invert != flags.check(FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP_COMPOUND)   ? _calculateNoReturn : calculateUniswapCompound,
-            invert != flags.check(FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP_CHAI)       ? _calculateNoReturn : calculateUniswapChai,
-            invert != flags.check(FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP_AAVE)       ? _calculateNoReturn : calculateUniswapAave,
-            invert != flags.check(FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP)        ? _calculateNoReturn : calculateMooniswap,
-            invert != flags.check(FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2)      ? _calculateNoReturn : calculateUniswapV2,
-            invert != flags.check(FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2_ETH)  ? _calculateNoReturn : calculateUniswapV2ETH,
-            invert != flags.check(FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2_DAI)  ? _calculateNoReturn : calculateUniswapV2DAI,
-            invert != flags.check(FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2_USDC) ? _calculateNoReturn : calculateUniswapV2USDC,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_PAX)            ? _calculateNoReturn : calculateCurvePAX,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_RENBTC)         ? _calculateNoReturn : calculateCurveRenBTC,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_TBTC)           ? _calculateNoReturn : calculateCurveTBTC,
-            invert != flags.check(FLAG_DISABLE_DFORCE_SWAP)                                   ? _calculateNoReturn : calculateDforceSwap,
-            invert != flags.check(FLAG_DISABLE_SHELL)                                         ? _calculateNoReturn : calculateShell,
-            invert != flags.check(FLAG_DISABLE_MSTABLE_MUSD)                                  ? _calculateNoReturn : calculateMStableMUSD,
-            invert != flags.check(FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_SBTC)           ? _calculateNoReturn : calculateCurveSBTC,
-            invert != flags.check(FLAG_DISABLE_BALANCER_ALL | FLAG_DISABLE_BALANCER_1)        ? _calculateNoReturn : calculateBalancer1,
-            invert != flags.check(FLAG_DISABLE_BALANCER_ALL | FLAG_DISABLE_BALANCER_2)        ? _calculateNoReturn : calculateBalancer2,
-            invert != flags.check(FLAG_DISABLE_BALANCER_ALL | FLAG_DISABLE_BALANCER_3)        ? _calculateNoReturn : calculateBalancer3,
-            invert != flags.check(FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_1)              ? _calculateNoReturn : calculateKyber1,
-            invert != flags.check(FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_2)              ? _calculateNoReturn : calculateKyber2,
-            invert != flags.check(FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_3)              ? _calculateNoReturn : calculateKyber3,
-            invert != flags.check(FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_4)              ? _calculateNoReturn : calculateKyber4,
-            invert != flags.check(FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP_ETH)    ? _calculateNoReturn : calculateMooniswapOverETH,
-            invert != flags.check(FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP_DAI)    ? _calculateNoReturn : calculateMooniswapOverDAI,
-            invert != flags.check(FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP_USDC)   ? _calculateNoReturn : calculateMooniswapOverUSDC
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP)            ? _calculateNoReturn : calculateUniswap,
+            _calculateNoReturn, // invert != DisableFlags.check(flags, FLAG_DISABLE_KYBER) ? _calculateNoReturn : calculateKyber,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_BANCOR)                                        ? _calculateNoReturn : calculateBancor,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_OASIS)                                         ? _calculateNoReturn : calculateOasis,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_COMPOUND)       ? _calculateNoReturn : calculateCurveCompound,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_USDT)           ? _calculateNoReturn : calculateCurveUSDT,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_Y)              ? _calculateNoReturn : calculateCurveY,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_BINANCE)        ? _calculateNoReturn : calculateCurveBinance,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_SYNTHETIX)      ? _calculateNoReturn : calculateCurveSynthetix,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP_COMPOUND)   ? _calculateNoReturn : calculateUniswapCompound,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP_CHAI)       ? _calculateNoReturn : calculateUniswapChai,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_ALL | FLAG_DISABLE_UNISWAP_AAVE)       ? _calculateNoReturn : calculateUniswapAave,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP)        ? _calculateNoReturn : calculateMooniswap,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2)      ? _calculateNoReturn : calculateUniswapV2,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2_ETH)  ? _calculateNoReturn : calculateUniswapV2ETH,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2_DAI)  ? _calculateNoReturn : calculateUniswapV2DAI,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_UNISWAP_V2_ALL | FLAG_DISABLE_UNISWAP_V2_USDC) ? _calculateNoReturn : calculateUniswapV2USDC,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_PAX)            ? _calculateNoReturn : calculateCurvePAX,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_RENBTC)         ? _calculateNoReturn : calculateCurveRenBTC,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_TBTC)           ? _calculateNoReturn : calculateCurveTBTC,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_DFORCE_SWAP)                                   ? _calculateNoReturn : calculateDforceSwap,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_SHELL)                                         ? _calculateNoReturn : calculateShell,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_MSTABLE_MUSD)                                  ? _calculateNoReturn : calculateMStableMUSD,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_CURVE_ALL | FLAG_DISABLE_CURVE_SBTC)           ? _calculateNoReturn : calculateCurveSBTC,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_BALANCER_ALL | FLAG_DISABLE_BALANCER_1)        ? _calculateNoReturn : calculateBalancer1,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_BALANCER_ALL | FLAG_DISABLE_BALANCER_2)        ? _calculateNoReturn : calculateBalancer2,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_BALANCER_ALL | FLAG_DISABLE_BALANCER_3)        ? _calculateNoReturn : calculateBalancer3,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_1)              ? _calculateNoReturn : calculateKyber1,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_2)              ? _calculateNoReturn : calculateKyber2,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_3)              ? _calculateNoReturn : calculateKyber3,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_KYBER_ALL | FLAG_DISABLE_KYBER_4)              ? _calculateNoReturn : calculateKyber4,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP_ETH)    ? _calculateNoReturn : calculateMooniswapOverETH,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP_DAI)    ? _calculateNoReturn : calculateMooniswapOverDAI,
+            invert != DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_ALL | FLAG_DISABLE_MOONISWAP_USDC)   ? _calculateNoReturn : calculateMooniswapOverUSDC
         ];
     }
 
@@ -578,8 +579,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 poolIndex
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         address[] memory pools = balancerRegistry.getBestPoolsWithLimit(
-            address(fromToken.isETH() ? weth : fromToken),
-            address(destToken.isETH() ? weth : destToken),
+            address(UniversalERC20.isETH(fromToken) ? weth : fromToken),
+            address(UniversalERC20.isETH(destToken) ? weth : destToken),
             poolIndex + 1
         );
         if (poolIndex >= pools.length) {
@@ -588,11 +589,11 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         rets = balancerHelper.getReturns(
             IBalancerPool(pools[poolIndex]),
-            fromToken.isETH() ? weth : fromToken,
-            destToken.isETH() ? weth : destToken,
+            UniversalERC20.isETH(fromToken) ? weth : fromToken,
+            UniversalERC20.isETH(destToken) ? weth : destToken,
             _linearInterpolation(amount, parts)
         );
-        gas = 75_000 + (fromToken.isETH() || destToken.isETH() ? 0 : 65_000);
+        gas = 75_000 + (UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken) ? 0 : 65_000);
     }
 
     function calculateBalancer1(
@@ -663,14 +664,14 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                 musd.getSwapOutput.selector,
                 fromToken,
                 destToken,
-                amount.mul(parts.div(i)).div(parts)
+                amount * (parts/i) / (parts)
             ));
 
             if (success && data.length > 0) {
                 (,, uint256 maxRet) = abi.decode(data, (bool,string,uint256));
                 if (maxRet > 0) {
-                    for (uint j = 0; j < parts.div(i); j++) {
-                        rets[j] = maxRet.mul(j + 1).div(parts.div(i));
+                    for (uint j = 0; j < parts/i; j++) {
+                        rets[j] = maxRet * (j + 1) / (parts / (i));
                     }
                     break;
                 }
@@ -710,7 +711,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         for (uint k = 0; k < 8 && balances[k] > 0; k++) {
             precisions[k] = 10 ** (18 - (haveUnderlying ? underlying_decimals : decimals)[k]);
             if (haveUnderlying) {
-                rates[k] = underlying_balances[k].mul(1e18).div(balances[k]);
+                rates[k] = underlying_balances[k] * 1e18 / (balances[k]);
             } else {
                 rates[k] = 1e18;
             }
@@ -789,7 +790,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts
     ) internal pure returns(uint256[100] memory rets) {
         for (uint i = 0; i < parts; i++) {
-            rets[i] = value.mul(i + 1).div(parts);
+            rets[i] = value * (i + 1) / (parts);
         }
     }
 
@@ -1035,7 +1036,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         }
 
         uint256 maxRet = abi.decode(data, (uint256));
-        uint256 available = destToken.universalBalanceOf(address(dforceSwap));
+        uint256 available = UniversalERC20.universalBalanceOf(destToken,address(dforceSwap));
         if (maxRet > available) {
             return (new uint256[](parts), 0);
         }
@@ -1047,8 +1048,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         if (amount == 0) {
             return 0;
         }
-        return amount.mul(toBalance).mul(997).div(
-            fromBalance.mul(1000).add(amount.mul(997))
+        return amount * (toBalance) * (997) / (
+            fromBalance * (1000) + (amount * (997))
         );
     }
 
@@ -1060,13 +1061,13 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         rets = amounts;
 
-        if (!fromToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken)) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
             if (fromExchange == IUniswapExchange(address(0))) {
                 return (new uint256[](rets.length), 0);
             }
 
-            uint256 fromTokenBalance = fromToken.universalBalanceOf(address(fromExchange));
+            uint256 fromTokenBalance = UniversalERC20.universalBalanceOf(fromToken,address(fromExchange));
             uint256 fromEtherBalance = address(fromExchange).balance;
 
             for (uint i = 0; i < rets.length; i++) {
@@ -1074,21 +1075,21 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             }
         }
 
-        if (!destToken.isETH()) {
+        if (!UniversalERC20.isETH(destToken)) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
             if (toExchange == IUniswapExchange(address(0))) {
                 return (new uint256[](rets.length), 0);
             }
 
             uint256 toEtherBalance = address(toExchange).balance;
-            uint256 toTokenBalance = destToken.universalBalanceOf(address(toExchange));
+            uint256 toTokenBalance = UniversalERC20.universalBalanceOf(destToken,address(toExchange));
 
             for (uint i = 0; i < rets.length; i++) {
                 rets[i] = _calculateUniswapFormula(toEtherBalance, toTokenBalance, rets[i]);
             }
         }
 
-        return (rets, fromToken.isETH() || destToken.isETH() ? 60_000 : 100_000);
+        return (rets, UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken) ? 60_000 : 100_000);
     }
 
     function calculateUniswap(
@@ -1117,16 +1118,16 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 gas1,
         uint256 gas2
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (!fromToken.isETH() && destToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken) && UniversalERC20.isETH(destToken)) {
             (rets, gas) = _calculateUniswap(
                 midToken,
                 destToken,
-                _linearInterpolation(amount.mul(1e18).div(midTokenPrice), parts),
+                _linearInterpolation(amount * (1e18) / (midTokenPrice), parts),
                 flags
             );
             return (rets, gas + gas1);
         }
-        else if (fromToken.isETH() && !destToken.isETH()) {
+        else if (UniversalERC20.isETH(fromToken) && !UniversalERC20.isETH(destToken)) {
             (rets, gas) = _calculateUniswap(
                 fromToken,
                 midToken,
@@ -1135,7 +1136,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             );
 
             for (uint i = 0; i < parts; i++) {
-                rets[i] = rets[i].mul(midTokenPrice).div(1e18);
+                rets[i] = rets[i] * (midTokenPrice) / (1e18);
             }
             return (rets, gas + gas2);
         }
@@ -1151,14 +1152,14 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         IERC20 midPreToken;
-        if (!fromToken.isETH() && destToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken) && UniversalERC20.isETH(destToken)) {
             midPreToken = fromToken;
         }
-        else if (!destToken.isETH() && fromToken.isETH()) {
+        else if (!UniversalERC20.isETH(destToken) && UniversalERC20.isETH(fromToken)) {
             midPreToken = destToken;
         }
 
-        if (!midPreToken.isETH()) {
+        if (!UniversalERC20.isETH(midPreToken)) {
             ICompoundToken midToken = compoundRegistry.cTokenByToken(midPreToken);
             if (midToken != ICompoundToken(address(0))) {
                 return _calculateUniswapWrapped(
@@ -1185,8 +1186,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (fromToken == dai && destToken.isETH() ||
-            fromToken.isETH() && destToken == dai)
+        if (fromToken == dai && UniversalERC20.isETH(destToken) ||
+            UniversalERC20.isETH(fromToken) && destToken == dai)
         {
             return _calculateUniswapWrapped(
                 fromToken,
@@ -1212,14 +1213,14 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         IERC20 midPreToken;
-        if (!fromToken.isETH() && destToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken) && UniversalERC20.isETH(destToken)) {
             midPreToken = fromToken;
         }
-        else if (!destToken.isETH() && fromToken.isETH()) {
+        else if (!UniversalERC20.isETH(destToken) && UniversalERC20.isETH(fromToken)) {
             midPreToken = destToken;
         }
 
-        if (!midPreToken.isETH()) {
+        if (!UniversalERC20.isETH(midPreToken)) {
             IAaveToken midToken = aaveRegistry.aTokenByToken(midPreToken);
             if (midToken != IAaveToken(address(0))) {
                 return _calculateUniswapWrapped(
@@ -1377,9 +1378,9 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             if (i > 0 && rets[i - 1] == 0) {
                 break;
             }
-            rets[i] = amount.mul(i + 1).div(parts);
+            rets[i] = amount * (i + 1) / (parts);
 
-            if (!fromToken.isETH()) {
+            if (!UniversalERC20.isETH(fromToken)) {
                 if (fromHint.length == 0) {
                     rets[i] = 0;
                     break;
@@ -1391,10 +1392,10 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     flags,
                     fromHint
                 );
-                rets[i] = rate.mul(rets[i]).div(fromTokenDecimals);
+                rets[i] = rate * (rets[i]) / (fromTokenDecimals);
             }
 
-            if (!destToken.isETH() && rets[i] > 0) {
+            if (!UniversalERC20.isETH(destToken) && rets[i] > 0) {
                 if (destHint.length == 0) {
                     rets[i] = 0;
                     break;
@@ -1406,7 +1407,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
                     10,
                     destHint
                 );
-                rets[i] = rate.mul(rets[i]).mul(destTokenDecimals).div(1e36);
+                rets[i] = rate * (rets[i]) * (destTokenDecimals) / (1e36);
             }
         }
 
@@ -1424,8 +1425,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         // IBancorNetwork bancorNetwork = IBancorNetwork(bancorContractRegistry.addressOf("BancorNetwork"));
 
         // address[] memory path = bancorFinder.buildBancorPath(
-        //     fromToken.isETH() ? bancorEtherToken : fromToken,
-        //     destToken.isETH() ? bancorEtherToken : destToken
+        //     UniversalERC20.isETH(fromToken) ? bancorEtherToken : fromToken,
+        //     UniversalERC20.isETH(destToken) ? bancorEtherToken : destToken
         // );
 
         // rets = _linearInterpolation(amount, parts);
@@ -1448,7 +1449,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         //     }
         // }
 
-        // return (rets, path.length.mul(150_000));
+        // return (rets, path.length * (150_000));
     }
 
     function calculateOasis(
@@ -1463,8 +1464,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             (bool success, bytes memory data) = address(oasisExchange).staticcall{gas: 500000}(
                 abi.encodeWithSelector(
                     oasisExchange.getBuyAmount.selector,
-                    destToken.isETH() ? weth : destToken,
-                    fromToken.isETH() ? weth : fromToken,
+                    UniversalERC20.isETH(destToken) ? weth : destToken,
+                    UniversalERC20.isETH(fromToken) ? weth : fromToken,
                     rets[i]
                 )
             );
@@ -1490,28 +1491,28 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         rets = new uint256[](amounts.length);
 
         IMooniswap mooniswap = mooniswapRegistry.pools(
-            fromToken.isETH() ? ZERO_ADDRESS : fromToken,
-            destToken.isETH() ? ZERO_ADDRESS : destToken
+            UniversalERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
+            UniversalERC20.isETH(destToken) ? ZERO_ADDRESS : destToken
         );
         if (mooniswap == IMooniswap(address(0))) {
             return (rets, 0);
         }
 
         uint256 fee = mooniswap.fee();
-        uint256 fromBalance = mooniswap.getBalanceForAddition(fromToken.isETH() ? ZERO_ADDRESS : fromToken);
-        uint256 destBalance = mooniswap.getBalanceForRemoval(destToken.isETH() ? ZERO_ADDRESS : destToken);
+        uint256 fromBalance = mooniswap.getBalanceForAddition(UniversalERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken);
+        uint256 destBalance = mooniswap.getBalanceForRemoval(UniversalERC20.isETH(destToken) ? ZERO_ADDRESS : destToken);
         if (fromBalance == 0 || destBalance == 0) {
             return (rets, 0);
         }
 
         for (uint i = 0; i < amounts.length; i++) {
-            uint256 amount = amounts[i].sub(amounts[i].mul(fee).div(1e18));
-            rets[i] = amount.mul(destBalance).div(
-                fromBalance.add(amount)
+            uint256 amount = amounts[i] - (amounts[i] * (fee) / (1e18));
+            rets[i] = amount * (destBalance) / (
+                fromBalance + (amount)
             );
         }
 
-        return (rets, (fromToken.isETH() || destToken.isETH()) ? 80_000 : 110_000);
+        return (rets, (UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken)) ? 80_000 : 110_000);
     }
 
     function calculateMooniswap(
@@ -1535,13 +1536,13 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (fromToken.isETH() || destToken.isETH()) {
+        if (UniversalERC20.isETH(fromToken) || UniversalERC20.isETH(destToken)) {
             return (new uint256[](parts), 0);
         }
 
         (uint256[] memory results, uint256 gas1) = calculateMooniswap(fromToken, ZERO_ADDRESS, amount, parts, flags);
         (rets, gas) = calculateMooniswapMany(ZERO_ADDRESS, destToken, results);
-        gas = gas.add(gas1);
+        gas = gas + (gas1);
     }
 
     function calculateMooniswapOverDAI(
@@ -1557,7 +1558,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         (uint256[] memory results, uint256 gas1) = calculateMooniswap(fromToken, dai, amount, parts, flags);
         (rets, gas) = calculateMooniswapMany(dai, destToken, results);
-        gas = gas.add(gas1);
+        gas = gas + (gas1);
     }
 
     function calculateMooniswapOverUSDC(
@@ -1573,7 +1574,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         (uint256[] memory results, uint256 gas1) = calculateMooniswap(fromToken, usdc, amount, parts, flags);
         (rets, gas) = calculateMooniswapMany(usdc, destToken, results);
-        gas = gas.add(gas1);
+        gas = gas + (gas1);
     }
 
     function calculateUniswapV2(
@@ -1598,7 +1599,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         uint256 parts,
         uint256 flags
     ) internal view returns(uint256[] memory rets, uint256 gas) {
-        if (fromToken.isETH() || fromToken == weth || destToken.isETH() || destToken == weth) {
+        if (UniversalERC20.isETH(fromToken) || fromToken == weth || UniversalERC20.isETH(destToken) || destToken == weth) {
             return (new uint256[](parts), 0);
         }
 
@@ -1662,8 +1663,8 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
     ) internal view returns(uint256[] memory rets, uint256 gas) {
         rets = new uint256[](amounts.length);
 
-        IERC20 fromTokenReal = fromToken.isETH() ? weth : fromToken;
-        IERC20 destTokenReal = destToken.isETH() ? weth : destToken;
+        IERC20 fromTokenReal = UniversalERC20.isETH(fromToken) ? weth : fromToken;
+        IERC20 destTokenReal = UniversalERC20.isETH(destToken) ? weth : destToken;
         IUniswapV2Exchange exchange = uniswapV2.getPair(fromTokenReal, destTokenReal);
         if (exchange != IUniswapV2Exchange(address(0))) {
             uint256 fromTokenBalance = fromTokenReal.universalBalanceOf(address(exchange));
@@ -1861,7 +1862,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 lastNonZeroIndex = 0;
         for (uint i = 0; i < distribution.length; i++) {
             if (distribution[i] > 0) {
-                parts = parts.add(distribution[i]);
+                parts = parts + (distribution[i]);
                 lastNonZeroIndex = i;
             }
         }
@@ -1875,14 +1876,14 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         }
 
         fromToken.universalTransferFrom(msg.sender, address(this), amount);
-        uint256 remainingAmount = fromToken.universalBalanceOf(address(this));
+        uint256 remainingAmount = UniversalERC20.universalBalanceOf(fromToken,address(this));
 
         for (uint i = 0; i < distribution.length; i++) {
             if (distribution[i] == 0) {
                 continue;
             }
 
-            uint256 swapAmount = amount.mul(distribution[i]).div(parts);
+            uint256 swapAmount = amount * (distribution[i]) / (parts);
             if (i == lastNonZeroIndex) {
                 swapAmount = remainingAmount;
             }
@@ -1890,10 +1891,10 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             reserves[i](fromToken, destToken, swapAmount, flags);
         }
 
-        returnAmount = destToken.universalBalanceOf(address(this));
+        returnAmount = UniversalERC20.universalBalanceOf(destToken,address(this));
         require(returnAmount >= minReturn, "OneSplit: Return amount was not enough");
         destToken.universalTransfer(msg.sender, returnAmount);
-        fromToken.universalTransfer(msg.sender, fromToken.universalBalanceOf(address(this)));
+        fromToken.universalTransfer(msg.sender, UniversalERC20.universalBalanceOf(fromToken,address(this)));
     }
 
     // Swap helpers
@@ -2129,7 +2130,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
     ) internal {
         uint256 returnAmount = amount;
 
-        if (!fromToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken)) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
             if (fromExchange != IUniswapExchange(address(0))) {
                 fromToken.universalApprove(address(fromExchange), returnAmount);
@@ -2137,7 +2138,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             }
         }
 
-        if (!destToken.isETH()) {
+        if (!UniversalERC20.isETH(destToken)) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
             if (toExchange != IUniswapExchange(address(0))) {
                 returnAmount = toExchange.ethToTokenSwapInput{value:returnAmount}(1, block.timestamp);
@@ -2151,7 +2152,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 flags
     ) internal {
-        if (!fromToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken)) {
             ICompoundToken fromCompound = compoundRegistry.cTokenByToken(fromToken);
             fromToken.universalApprove(address(fromCompound), amount);
             fromCompound.mint(amount);
@@ -2159,11 +2160,11 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             return;
         }
 
-        if (!destToken.isETH()) {
+        if (!UniversalERC20.isETH(destToken)) {
             ICompoundToken toCompound = compoundRegistry.cTokenByToken(destToken);
             _swapOnUniswap(fromToken, IERC20(toCompound), amount, flags);
             toCompound.redeem(IERC20(toCompound).universalBalanceOf(address(this)));
-            destToken.universalBalanceOf(address(this));
+            UniversalERC20.universalBalanceOf(destToken,address(this));
             return;
         }
     }
@@ -2194,7 +2195,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 amount,
         uint256 flags
     ) internal {
-        if (!fromToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken)) {
             IAaveToken fromAave = aaveRegistry.aTokenByToken(fromToken);
             fromToken.universalApprove(aave.core(), amount);
             aave.deposit(fromToken, amount, 1101);
@@ -2202,7 +2203,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             return;
         }
 
-        if (!destToken.isETH()) {
+        if (!UniversalERC20.isETH(destToken)) {
             IAaveToken toAave = aaveRegistry.aTokenByToken(destToken);
             _swapOnUniswap(fromToken, IERC20(toAave), amount, flags);
             toAave.redeem(toAave.balanceOf(address(this)));
@@ -2217,8 +2218,8 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 /*flags*/
     ) internal {
         IMooniswap mooniswap = mooniswapRegistry.pools(
-            fromToken.isETH() ? ZERO_ADDRESS : fromToken,
-            destToken.isETH() ? ZERO_ADDRESS : destToken
+            UniversalERC20.isETH(fromToken) ? ZERO_ADDRESS : fromToken,
+            UniversalERC20.isETH(destToken) ? ZERO_ADDRESS : destToken
         );
         fromToken.universalApprove(address(mooniswap), amount);
         mooniswap.swap{value: fromToken.isETH() ? amount : 0}(
@@ -2341,7 +2342,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         bytes32[] memory reserveIds = new bytes32[](1);
         reserveIds[0] = reserveId;
 
-        if (!fromToken.isETH()) {
+        if (!UniversalERC20.isETH(fromToken)) {
             bytes memory fromHint = kyberHintHandler.buildTokenToEthHint(
                 fromToken,
                 IKyberHintHandler.TradeType.MaskIn,
@@ -2363,7 +2364,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             );
         }
 
-        if (!destToken.isETH()) {
+        if (!UniversalERC20.isETH(destToken)) {
             bytes memory destHint = kyberHintHandler.buildEthToTokenHint(
                 destToken,
                 IKyberHintHandler.TradeType.MaskIn,
@@ -2393,8 +2394,8 @@ contract OneSplit is IOneSplit, OneSplitRoot {
     ) internal {
         IBancorNetwork bancorNetwork = IBancorNetwork(bancorContractRegistry.addressOf("BancorNetwork"));
         address[] memory path = bancorNetworkPathFinder.generatePath(
-            fromToken.isETH() ? bancorEtherToken : fromToken,
-            destToken.isETH() ? bancorEtherToken : destToken
+            UniversalERC20.isETH(fromToken) ? bancorEtherToken : fromToken,
+            UniversalERC20.isETH(destToken) ? bancorEtherToken : destToken
         );
         fromToken.universalApprove(address(bancorNetwork), amount);
         bancorNetwork.convert{value: fromToken.isETH() ? amount : 0}(path, amount, 1);
@@ -2410,16 +2411,16 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             weth.deposit{value: amount}(); //TODO: this cant be right
         }
 
-        IERC20 approveToken = fromToken.isETH() ? weth : fromToken;
+        IERC20 approveToken = UniversalERC20.isETH(fromToken) ? weth : fromToken;
         approveToken.universalApprove(address(oasisExchange), amount);
         oasisExchange.sellAllAmount(
-            fromToken.isETH() ? weth : fromToken,
+            UniversalERC20.isETH(fromToken) ? weth : fromToken,
             amount,
-            destToken.isETH() ? weth : destToken,
+            UniversalERC20.isETH(destToken) ? weth : destToken,
             1
         );
 
-        if (destToken.isETH()) {
+        if (UniversalERC20.isETH(destToken)) {
             weth.withdraw(weth.balanceOf(address(this)));
         }
     }
@@ -2434,8 +2435,8 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             weth.deposit{value: amount}(); //TODO: this cant be right
         }
 
-        IERC20 fromTokenReal = fromToken.isETH() ? weth : fromToken;
-        IERC20 toTokenReal = destToken.isETH() ? weth : destToken;
+        IERC20 fromTokenReal = UniversalERC20.isETH(fromToken) ? weth : fromToken;
+        IERC20 toTokenReal = UniversalERC20.isETH(destToken) ? weth : destToken;
         IUniswapV2Exchange exchange = uniswapV2.getPair(fromTokenReal, toTokenReal);
         bool needSync;
         bool needSkim;
@@ -2454,7 +2455,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             exchange.swap(returnAmount, 0, address(this), "");
         }
 
-        if (destToken.isETH()) {
+        if (UniversalERC20.isETH(destToken)) {
             weth.withdraw(weth.balanceOf(address(this)));
         }
     }
@@ -2546,8 +2547,8 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         uint256 poolIndex
     ) internal {
         address[] memory pools = balancerRegistry.getBestPoolsWithLimit(
-            address(fromToken.isETH() ? weth : fromToken),
-            address(destToken.isETH() ? weth : destToken),
+            address(UniversalERC20.isETH(fromToken) ? weth : fromToken),
+            address(UniversalERC20.isETH(destToken) ? weth : destToken),
             poolIndex + 1
         );
 
@@ -2555,16 +2556,16 @@ contract OneSplit is IOneSplit, OneSplitRoot {
             weth.deposit{value: amount}(); //TODO: this cant be right
         }
 
-        (fromToken.isETH() ? weth : fromToken).universalApprove(pools[poolIndex], amount);
+        (UniversalERC20.isETH(fromToken) ? weth : fromToken).universalApprove(pools[poolIndex], amount);
         IBalancerPool(pools[poolIndex]).swapExactAmountIn(
-            fromToken.isETH() ? weth : fromToken,
+            UniversalERC20.isETH(fromToken) ? weth : fromToken,
             amount,
-            destToken.isETH() ? weth : destToken,
+            UniversalERC20.isETH(destToken) ? weth : destToken,
             0,
             uint256(0)
         );
 
-        if (destToken.isETH()) {
+        if (UniversalERC20.isETH(destToken)) {
             weth.withdraw(weth.balanceOf(address(this)));
         }
     }

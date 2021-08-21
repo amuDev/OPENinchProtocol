@@ -60,7 +60,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
         }
 
 
-        if (!flags.check(FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
+        if (!DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
             bool isPoolTokenFrom = mooniswapRegistry.isPool(address(fromToken));
             bool isPoolTokenTo = mooniswapRegistry.isPool(address(toToken));
 
@@ -148,11 +148,11 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
         for (uint i = 0; i < 2; i++) {
 
             uint256 exchangeAmount = amount
-                .mul(details.tokens[i].reserve)
-                .div(details.totalSupply);
+                 * (details.tokens[i].reserve)
+                 / (details.totalSupply);
 
             if (toToken.eq(details.tokens[i].token)) {
-                returnAmount = returnAmount.add(exchangeAmount);
+                returnAmount = returnAmount + (exchangeAmount);
                 continue;
             }
 
@@ -165,7 +165,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
                 0
             );
 
-            returnAmount = returnAmount.add(ret);
+            returnAmount = returnAmount + (ret);
             for (uint j = 0; j < distribution.length; j++) {
                 distribution[j] |= dist[j] << (i * 8);
             }
@@ -194,8 +194,8 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
 
         // will overwritten to liquidity amounts
         uint256[2] memory amounts;
-        amounts[0] = amount.div(2);
-        amounts[1] = amount.sub(amounts[0]);
+        amounts[0] = amount / (2);
+        amounts[1] = amount - (amounts[0]);
         uint256[] memory dist = new uint256[](distribution.length);
         for (uint i = 0; i < 2; i++) {
 
@@ -221,7 +221,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
         for (uint i = 0; i < 2; i++) {
             returnAmount = Math.min(
                 returnAmount,
-                details.totalSupply.mul(amounts[i]).div(details.tokens[i].reserve)
+                details.totalSupply * (amounts[i]) / (details.tokens[i].reserve)
             );
         }
 
@@ -250,7 +250,7 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
             return;
         }
 
-        if (!flags.check(FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
+        if (!DisableFlags.check(flags, FLAG_DISABLE_MOONISWAP_POOL_TOKEN)) {
             bool isPoolTokenFrom = mooniswapRegistry.isPool(address(fromToken));
             bool isPoolTokenTo = mooniswapRegistry.isPool(address(toToken));
 
@@ -279,7 +279,7 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
                 return _swapToMooniswapToken(
                     ETH_ADDRESS,
                     toToken,
-                    ethBalanceAfter.sub(ethBalanceBefore),
+                    ethBalanceAfter - (ethBalanceBefore),
                     dist,
                     FLAG_DISABLE_MOONISWAP_POOL_TOKEN
                 );
@@ -367,8 +367,8 @@ abstract contract OneSplitMooniswapToken is OneSplitBaseWrap, OneSplitMooniswapT
 
         // will overwritten to liquidity amounts
         uint256[] memory amounts = new uint256[](2);
-        amounts[0] = amount.div(2);
-        amounts[1] = amount.sub(amounts[0]);
+        amounts[0] = amount / (2);
+        amounts[1] = amount - (amounts[0]);
         uint256[] memory dist = new uint256[](distribution.length);
         for (uint i = 0; i < 2; i++) {
 

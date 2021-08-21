@@ -54,14 +54,14 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_COMPOUND)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_COMPOUND)) {
             IERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
             if (underlying != IERC20(address(0))) {
                 uint256 compoundRate = ICompoundToken(address(fromToken)).exchangeRateStored();
                 (returnAmount, estimateGasAmount, distribution) = _compoundGetExpectedReturn(
                     underlying,
                     destToken,
-                    amount.mul(compoundRate).div(1e18),
+                    amount * (compoundRate) / (1e18),
                     parts,
                     flags,
                     destTokenEthPriceTimesGasPrice
@@ -79,9 +79,9 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
                     amount,
                     parts,
                     flags,
-                    _destTokenEthPriceTimesGasPrice.mul(compoundRate).div(1e18)
+                    _destTokenEthPriceTimesGasPrice * (compoundRate) / (1e18)
                 );
-                return (returnAmount.mul(1e18).div(compoundRate), estimateGasAmount + 430_000, distribution);
+                return (returnAmount * (1e18) / (compoundRate), estimateGasAmount + 430_000, distribution);
             }
         }
 
@@ -129,7 +129,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
             return;
         }
 
-        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_COMPOUND)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_COMPOUND)) {
             IERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
             if (underlying != IERC20(address(0))) {
                 ICompoundToken(address(fromToken)).redeem(amount);

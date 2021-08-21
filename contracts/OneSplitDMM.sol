@@ -88,7 +88,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_DMM)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_DMM)) {
             IERC20 underlying = _getDMMUnderlyingToken(fromToken);
             if (underlying != IERC20(address(0))) {
                 if (underlying == weth) {
@@ -98,7 +98,7 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
                 (returnAmount, estimateGasAmount, distribution) = _dmmGetExpectedReturn(
                     underlying,
                     destToken,
-                    amount.mul(_getDMMExchangeRate(IDMM(address(_fromToken)))).div(1e18),
+                    amount * (_getDMMExchangeRate(IDMM(address(_fromToken)))) / (1e18),
                     parts,
                     flags,
                     destTokenEthPriceTimesGasPrice
@@ -118,10 +118,10 @@ abstract contract OneSplitDMMView is OneSplitViewWrapBase, OneSplitDMMBase {
                     amount,
                     parts,
                     flags,
-                    destTokenEthPriceTimesGasPrice.mul(price).div(1e18)
+                    destTokenEthPriceTimesGasPrice * (price) / (1e18)
                 );
                 return (
-                    returnAmount.mul(1e18).div(price),
+                    returnAmount * (1e18) / (price),
                     estimateGasAmount + 430_000,
                     distribution
                 );
@@ -171,7 +171,7 @@ abstract contract OneSplitDMM is OneSplitBaseWrap, OneSplitDMMBase {
             return;
         }
 
-        if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_DMM)) {
+        if (DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == DisableFlags.check(flags, FLAG_DISABLE_DMM)) {
             IERC20 underlying = _getDMMUnderlyingToken(fromToken);
             if (underlying != IERC20(address(0))) {
                 IDMM(address(fromToken)).redeem(amount);

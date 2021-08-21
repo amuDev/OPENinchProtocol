@@ -26,7 +26,7 @@ contract BalancerHelper {
         uint256 destWeight = pool.getDenormalizedWeight(destToken);
 
         rets = new uint256[](amounts.length);
-        for (uint i = 0; i < amounts.length && amounts[i].mul(2) <= fromBalance; i++) {
+        for (uint i = 0; i < amounts.length && amounts[i] * 2 <= fromBalance; i++) {
             rets[i] = BalancerLib.calcOutGivenIn(
                 fromBalance,
                 fromWeight,

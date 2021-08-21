@@ -73,7 +73,7 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
             return (amount, 0, new uint256[](DEXES_COUNT));
         }
 
-        if (!flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == !flags.check(FLAG_DISABLE_IDLE)) {
+        if (!DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == !DisableFlags.check(flags, FLAG_DISABLE_IDLE)) {
             IIdle[8] memory tokens = _idleTokens();
 
             for (uint i = 0; i < tokens.length; i++) {
@@ -81,7 +81,7 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
                     (returnAmount, estimateGasAmount, distribution) = _idleGetExpectedReturn(
                         tokens[i].token(),
                         destToken,
-                        amount.mul(tokens[i].tokenPrice()).div(1e18),
+                        amount * (tokens[i].tokenPrice()) / (1e18),
                         parts,
                         flags,
                         destTokenEthPriceTimesGasPrice
@@ -101,9 +101,9 @@ abstract contract OneSplitIdleView is OneSplitViewWrapBase, OneSplitIdleBase {
                         amount,
                         parts,
                         flags,
-                        _destTokenEthPriceTimesGasPrice.mul(_price).div(1e18)
+                        _destTokenEthPriceTimesGasPrice * (_price) / (1e18)
                     );
-                    return (returnAmount.mul(1e18).div(_price), estimateGasAmount + 1_300_000, distribution);
+                    return (returnAmount * (1e18) / (_price), estimateGasAmount + 1_300_000, distribution);
                 }
             }
         }
@@ -147,7 +147,7 @@ abstract contract OneSplitIdle is OneSplitBaseWrap, OneSplitIdleBase {
         uint256[] memory distribution,
         uint256 flags
     ) internal {
-        if (!flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == !flags.check(FLAG_DISABLE_IDLE)) {
+        if (!DisableFlags.check(flags, FLAG_DISABLE_ALL_WRAP_SOURCES) == !DisableFlags.check(flags, FLAG_DISABLE_IDLE)) {
             IIdle[8] memory tokens = _idleTokens();
 
             for (uint i = 0; i < tokens.length; i++) {
