@@ -1062,7 +1062,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!fromToken.isETH()) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
-            if (fromExchange == IUniswapExchange(0)) {
+            if (fromExchange == IUniswapExchange(address(0))) {
                 return (new uint256[](rets.length), 0);
             }
 
@@ -1076,7 +1076,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!destToken.isETH()) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
-            if (toExchange == IUniswapExchange(0)) {
+            if (toExchange == IUniswapExchange(address(0))) {
                 return (new uint256[](rets.length), 0);
             }
 
@@ -1160,7 +1160,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!midPreToken.isETH()) {
             ICompoundToken midToken = compoundRegistry.cTokenByToken(midPreToken);
-            if (midToken != ICompoundToken(0)) {
+            if (midToken != ICompoundToken(address(0))) {
                 return _calculateUniswapWrapped(
                     fromToken,
                     midToken,
@@ -1221,7 +1221,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
 
         if (!midPreToken.isETH()) {
             IAaveToken midToken = aaveRegistry.aTokenByToken(midPreToken);
-            if (midToken != IAaveToken(0)) {
+            if (midToken != IAaveToken(address(0))) {
                 return _calculateUniswapWrapped(
                     fromToken,
                     midToken,
@@ -1493,7 +1493,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
             fromToken.isETH() ? ZERO_ADDRESS : fromToken,
             destToken.isETH() ? ZERO_ADDRESS : destToken
         );
-        if (mooniswap == IMooniswap(0)) {
+        if (mooniswap == IMooniswap(address(0))) {
             return (rets, 0);
         }
 
@@ -1665,7 +1665,7 @@ contract OneSplitView is IOneSplitView, OneSplitRoot {
         IERC20 fromTokenReal = fromToken.isETH() ? weth : fromToken;
         IERC20 destTokenReal = destToken.isETH() ? weth : destToken;
         IUniswapV2Exchange exchange = uniswapV2.getPair(fromTokenReal, destTokenReal);
-        if (exchange != IUniswapV2Exchange(0)) {
+        if (exchange != IUniswapV2Exchange(address(0))) {
             uint256 fromTokenBalance = fromTokenReal.universalBalanceOf(address(exchange));
             uint256 destTokenBalance = destTokenReal.universalBalanceOf(address(exchange));
             for (uint i = 0; i < amounts.length; i++) {
@@ -2131,7 +2131,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
 
         if (!fromToken.isETH()) {
             IUniswapExchange fromExchange = uniswapFactory.getExchange(fromToken);
-            if (fromExchange != IUniswapExchange(0)) {
+            if (fromExchange != IUniswapExchange(address(0))) {
                 fromToken.universalApprove(address(fromExchange), returnAmount);
                 returnAmount = fromExchange.tokenToEthSwapInput(returnAmount, 1, block.timestamp);
             }
@@ -2139,7 +2139,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
 
         if (!destToken.isETH()) {
             IUniswapExchange toExchange = uniswapFactory.getExchange(destToken);
-            if (toExchange != IUniswapExchange(0)) {
+            if (toExchange != IUniswapExchange(address(0))) {
                 returnAmount = toExchange.ethToTokenSwapInput{value:returnAmount}(1, block.timestamp);
             }
         }
@@ -2448,7 +2448,7 @@ contract OneSplit is IOneSplit, OneSplitRoot {
         }
 
         fromTokenReal.universalTransfer(address(exchange), amount);
-        if (uint256(address(fromTokenReal)) < uint256(address(toTokenReal))) {
+        if ((address(fromTokenReal)) < (address(toTokenReal))) { //TODO: removed uint256 conversion 
             exchange.swap(0, returnAmount, address(this), "");
         } else {
             exchange.swap(returnAmount, 0, address(this), "");

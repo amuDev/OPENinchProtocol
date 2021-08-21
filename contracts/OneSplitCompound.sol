@@ -56,7 +56,7 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_COMPOUND)) {
             IERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 uint256 compoundRate = ICompoundToken(address(fromToken)).exchangeRateStored();
                 (returnAmount, estimateGasAmount, distribution) = _compoundGetExpectedReturn(
                     underlying,
@@ -70,7 +70,7 @@ abstract contract OneSplitCompoundView is OneSplitViewWrapBase {
             }
 
             underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 uint256 _destTokenEthPriceTimesGasPrice = destTokenEthPriceTimesGasPrice;
                 uint256 compoundRate = ICompoundToken(address(destToken)).exchangeRateStored();
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
@@ -131,7 +131,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_COMPOUND)) {
             IERC20 underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 ICompoundToken(address(fromToken)).redeem(amount);
                 uint256 underlyingAmount = underlying.universalBalanceOf(address(this));
 
@@ -145,7 +145,7 @@ abstract contract OneSplitCompound is OneSplitBaseWrap {
             }
 
             underlying = compoundRegistry.tokenByCToken(ICompoundToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 super._swap(
                     fromToken,
                     underlying,

@@ -217,7 +217,7 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
             }
         }
 
-        returnAmount = uint256(-1);
+        returnAmount = uint256(0);
         for (uint i = 0; i < 2; i++) {
             returnAmount = Math.min(
                 returnAmount,
@@ -230,7 +230,6 @@ abstract contract OneSplitMooniswapTokenView is OneSplitViewWrapBase, OneSplitMo
             distribution
         );
     }
-
 }
 
 

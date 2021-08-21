@@ -55,7 +55,7 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_AAVE)) {
             IERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 (returnAmount, estimateGasAmount, distribution) = _aaveGetExpectedReturn(
                     underlying,
                     destToken,
@@ -68,7 +68,7 @@ abstract contract OneSplitAaveView is OneSplitViewWrapBase {
             }
 
             underlying = aaveRegistry.tokenByAToken(IAaveToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 (returnAmount, estimateGasAmount, distribution) = super.getExpectedReturnWithGas(
                     fromToken,
                     underlying,
@@ -126,7 +126,7 @@ abstract contract OneSplitAave is OneSplitBaseWrap {
 
         if (flags.check(FLAG_DISABLE_ALL_WRAP_SOURCES) == flags.check(FLAG_DISABLE_AAVE)) {
             IERC20 underlying = aaveRegistry.tokenByAToken(IAaveToken(address(fromToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 IAaveToken(address(fromToken)).redeem(amount);
 
                 return _aaveSwap(
@@ -139,7 +139,7 @@ abstract contract OneSplitAave is OneSplitBaseWrap {
             }
 
             underlying = aaveRegistry.tokenByAToken(IAaveToken(address(destToken)));
-            if (underlying != IERC20(0)) {
+            if (underlying != IERC20(address(0))) {
                 super._swap(
                     fromToken,
                     underlying,
